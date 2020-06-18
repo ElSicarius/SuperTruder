@@ -219,7 +219,7 @@ def status_matching(status):
 
 def main():
     # Get Options
-    parser = argparse.ArgumentParser(description='Enumerate all domains for a target')
+    parser = argparse.ArgumentParser(description='SuperTruder: Fuzz something, somewhere in an URL')
     parser.add_argument('-u', "--url",help='Url to test',)
     parser.add_argument('-p', "--payload",help='payload file',)
     parser.add_argument('-b', "--basePayload", help="Payload for base request", default="Sicarius")

@@ -4,7 +4,7 @@ An intruder custom that gave me bounties
 ```
 usage: intruder.py [-h] [-u URL] [-p PAYLOAD] [-b BASEPAYLOAD] [-f FILTER] [-l LENGTHFILTER] [-nl EXCLUDELENGTH] [-t TIMEFILTER] [-r] [-m] [--difftimer DIFFTIMER] [--timeout TIMEOUT] [--threads THREADS] [-d REPLACESTR] [-o DUMPHTML]
 
-Enumerate all domains for a target
+SuperTruder: Fuzz something, somewhere in an URL
 
 optional arguments:
   -h, --help            show this help message and exit
