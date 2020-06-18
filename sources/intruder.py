@@ -3,7 +3,7 @@
 from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED, CancelledError, thread
 import os
 import sys
-from requests import get, post
+from requests import get, post, packages
 from urllib.parse import unquote, quote
 import argparse
 import difflib
@@ -12,6 +12,7 @@ from .utils import *
 
 
 def main():
+    packages.urllib3.disable_warnings()
     # Get Options
     parser = argparse.ArgumentParser(description='SuperTruder: Fuzz something, somewhere in an URL')
     parser.add_argument('-u', "--url",help='Url to test',)
@@ -23,10 +24,11 @@ def main():
     parser.add_argument("-t", "--timeFilter", help='Specify the time range that we\'ll use to accept responses (eg: 0,999 or any, if 3 values, we\'ll accept EXACTLY this values)', default="any,any")
     parser.add_argument('-r', "--redir", dest="redir", default=False, action="store_true", help='Allow HTTP redirects',)
     parser.add_argument("-m", '--matchBaseRequest', action="store_true", default=False)
-    parser.add_argument("--forceEncode",help="Force URL encode", action="store_true")
+    parser.add_argument("--forceEncode", help="Force URL encode", action="store_true")
     parser.add_argument("--difftimer", help="Change the default matching timer (default 2000ms -> 2 seconds)", default=2000)
     parser.add_argument("--timeout", default=20)
     parser.add_argument("--threads", default=50)
+    parser.add_argument("--verify", default=False, action="store_true")
     parser.add_argument("-d","--replaceStr", default="§")
     parser.add_argument('-o', '--dumpHtml', help='file to dump html content',)
     args = parser.parse_args()
@@ -63,7 +65,7 @@ def main():
     futures = set()
     try:
         executor = ThreadPoolExecutor(max_workers=settings.threads)
-        futures.update({executor.submit(get_, settings.url.replace(settings.replaceStr, quote(p) if settings.forceEncode else p), settings.redir, settings.timeout, p) for p in payload } )
+        futures.update({executor.submit(get_, settings.url.replace(settings.replaceStr, quote(p) if settings.forceEncode else p), p) for p in payload } )
         while futures:
             done, futures = wait(futures, return_when=FIRST_COMPLETED)
             for futu in done:
@@ -94,8 +96,8 @@ def main():
                                 length = str(response_len)
                                 timer = str(response_time)
                                 url = unquote(r.url)
-                                print(f"{' '*(settings.termlength-len(unquote(r.url))-100)}", end="\r")
-                                print(f"{time_print}\t{current_status}/{payload_len}\t{status}\t{length}\t{timer}\t\t{url}\033[0m")
+                                print(f"{' '*(settings.termlength)}", end="\r")
+                                print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{status}\t{length}\t{timer}\t\t{url}\033[0m")
                                 if settings.out and len(r.content) != 0:
                                     try:
                                         with open(f"{settings.out}", 'wb') as f:
@@ -103,14 +105,12 @@ def main():
                                     except Exception as e:
                                         print(f"Error: could not write file {out} Error: {e}")
                             else:
-                                print(f"{time_print}\t{current_status}/{payload_len}\t{r.status_code}\t{len(r.content)}\t{round(r.elapsed.total_seconds()*1000,1)}\t\t{unquote(r.url)}"[:settings.termlength-50], end="\r")
+                                print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{r.status_code}\t{len(r.content)}\t{int(r.elapsed.total_seconds()*1000)}\t\t{r.url}"[:settings.termlength-100], end="\r")
                         else:
-                            print(f"{time_print}\t{current_status}/{payload_len}\t{r.status_code}\t{len(r.content)}\t{round(r.elapsed.total_seconds()*1000,1)}\t\t{unquote(r.url)}"[:settings.termlength-50], end="\r")
+                            print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{r.status_code}\t{len(r.content)}\t{int(r.elapsed.total_seconds()*1000)}\t\t{r.url}"[:settings.termlength-100], end="\r")
 
                     else:
                         print("Request == None ??")
-    except CancelledError:
-        print("cancelled thread")
     except KeyboardInterrupt:
         print(f"{' '*(settings.termlength-1)}", end="\r")
         print(f"\033[91m[-] Keyboard interrupt recieved, gracefully exiting........... Nah kill everything.\033[0m")
@@ -121,7 +121,7 @@ def main():
         executor._threads.clear()
         thread._threads_queues.clear()
 
+    print("\033[94m[+] Done\033[0m" + " "* settings.termlength)
 
 if __name__ == '__main__':
     main()
-    print("\033[94m[+] Done\033[0m" + " "* settings.termlength)

@@ -7,8 +7,10 @@ from urllib.parse import unquote, quote
 import argparse
 import difflib
 
+
 def set_global(settings):
     globals()["settings"] = settings
+
 
 class Settings:
     def __init__(self,args):
@@ -28,7 +30,7 @@ class Settings:
         self.excludeLength = parse_excluded_length(args.excludeLength)
         self.difftimer = args.difftimer
         self.forceEncode = args.forceEncode
-
+        self.verify = args.verify
     def __str__(self):
         if "any,any" in self.lengthFilter:
             length_message = "\033[1;36mSelecting length matching\033[0m: any"
@@ -65,7 +67,7 @@ class Settings:
 
 def get_base_request(url, redir, payload):
     try:
-        req = get(url.replace(settings.replaceStr, payload), allow_redirects=settings.redir)
+        req = get(url.replace(settings.replaceStr, payload), allow_redirects=settings.redir, verify=settings.verify)
     except Exception as e:
         print(f"An error occured while requesting base request, Stopping here. Error: {e}")
         exit(42)
@@ -199,8 +201,8 @@ def color_status(status):
     return status
 
 
-def get_(url, allow_redirects, timeout, parameter):
-    return (get(url, timeout=timeout, allow_redirects=allow_redirects), parameter)
+def get_(url, parameter):
+    return (get(url, timeout=settings.timeout, allow_redirects=settings.redir, verify=settings.verify), parameter)
 
 
 def status_matching(status):
