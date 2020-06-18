@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 
 import os
 import sys
@@ -6,6 +7,8 @@ from urllib.parse import unquote, quote
 import argparse
 import difflib
 
+def set_global(settings):
+    globals()["settings"] = settings
 
 class Settings:
     def __init__(self,args):
@@ -24,6 +27,7 @@ class Settings:
         self.timeFilter = parse_length_time_filter(args.timeFilter)
         self.excludeLength = parse_excluded_length(args.excludeLength)
         self.difftimer = args.difftimer
+        self.forceEncode = args.forceEncode
 
     def __str__(self):
         if "any,any" in self.lengthFilter:
@@ -49,6 +53,7 @@ class Settings:
         \033[1;36mRedirections allowed\033[0m: {self.redir}
         \033[1;36mTimeout of requests\033[0m: {self.timeout}
         \033[1;36mThreads\033[0m: {self.threads}
+        \033[1;36mForce Encoding\033[0m: {"True" if self.forceEncode else "False"}
 
 \033[92mCurrent Trigger settings\033[0m:
         \033[1;36mSelecting HTTP status code\033[0m: {self.httpcodesFilter}
