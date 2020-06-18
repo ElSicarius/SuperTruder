@@ -2,7 +2,7 @@
 An intruder custom that gave me bounties
 
 ```
-usage: intruder.py [-h] [-u URL] [-p PAYLOAD] [-b BASEPAYLOAD] [-f FILTER] [-l LENGTHFILTER] [-nl EXCLUDELENGTH] [-t TIMEFILTER] [-r] [-m] [--difftimer DIFFTIMER] [--timeout TIMEOUT] [--threads THREADS] [-d REPLACESTR] [-o DUMPHTML]
+usage: supertruder.py [-h] [-u URL] [-p PAYLOAD] [-b BASEPAYLOAD] [-f FILTER] [-l LENGTHFILTER] [-nl EXCLUDELENGTH] [-t TIMEFILTER] [-r] [-m] [--difftimer DIFFTIMER] [--timeout TIMEOUT] [--threads THREADS] [-d REPLACESTR] [-o DUMPHTML]
 
 SuperTruder: Fuzz something, somewhere in an URL
 
