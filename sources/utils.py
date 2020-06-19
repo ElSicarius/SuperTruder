@@ -33,6 +33,9 @@ class Settings:
         self.difftimer = args.difftimer
         self.forceEncode = args.forceEncode
         self.verify = args.verify
+        self.quick_ratio = args.quickRatio
+        self.difference = args.textDifference
+
     def __str__(self):
         if "any,any" in self.lengthFilter:
             length_message = "\033[1;36mSelecting length matching\033[0m: any"
@@ -91,7 +94,10 @@ def is_identical(req1, req2, parameter, basePayload):
     ## Well use "Real_quick_ratio" instead of "quick_ratio"
     ## This is needed because a page with a small length could be hard to match at +98% with an other page
     ## Eg: page1 = "abcd" page2 = "abce"; difference = 1 caracter but match is 75% !
-    difference_of_text = difflib.SequenceMatcher(None, req1.text, req2.text).quick_ratio()
+    if settings.quick_ratio:
+        difference_of_text = difflib.SequenceMatcher(None, req1.text, req2.text).quick_ratio()
+    else:
+        difference_of_text = difflib.SequenceMatcher(None, req1.text, req2.text).ratio()
     diff_timer_requests =  abs(round(req1.elapsed.total_seconds()*1000, 3) - round(req2.elapsed.total_seconds()*1000, 3))
 
     if diff_timer_requests >= settings.difftimer:
@@ -99,7 +105,7 @@ def is_identical(req1, req2, parameter, basePayload):
     #print(f"Text Similiratity: {(difference_of_text*100)}%")
     #print(f"Difference with len of page1 {len(req1.content)}, page2 {len(req2.content)}")
 
-    if req1.status_code == req2.status_code and difference_of_text > 0.98:
+    if req1.status_code == req2.status_code and difference_of_text > settings.difference:
         return True
     return False
 

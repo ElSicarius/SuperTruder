@@ -25,6 +25,8 @@ def main():
     parser.add_argument('-r', "--redir", dest="redir", default=False, action="store_true", help='Allow HTTP redirects',)
     parser.add_argument("-m", '--matchBaseRequest', action="store_true", default=False)
     parser.add_argument("--forceEncode", help="Force URL encode", action="store_true")
+    parser.add_argument("--quickRatio", help="Force quick ratio of pages (a bit faster)", action="store_true", default=False)
+    parser.add_argument("--textDifference", help="Percentage difference to match pages default: 99%", default=0.99)
     parser.add_argument("--difftimer", help="Change the default matching timer (default 2000ms -> 2 seconds)", default=2000)
     parser.add_argument("--timeout", default=20)
     parser.add_argument("--threads", default=50)
@@ -59,6 +61,7 @@ def main():
     print("Time\tPayload_index\tStatus\tLength\tResponse_time\tUrl")
     print("-"*100)
     payload = payloaddata.split('\n')
+    del payloaddata
     payload_len = len(payload)
     now = datetime.now()
     current_status = 0
@@ -71,7 +74,7 @@ def main():
             for futu in done:
                 try:
                     r, p = futu.result()
-                    current_status += 1
+                    current_status = payload.index(p)
                 except Exception as e:
                     #print(f"An Unhandled error occured in thread: {e}")
                     pass
@@ -105,10 +108,10 @@ def main():
                                     except Exception as e:
                                         print(f"Error: could not write file {out} Error: {e}")
                             else:
-                                print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t \t \t \t\t{settings.clean_url+' '*settings.termlength}"[:settings.termlength-100], end="\r")
+                                print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t   \t     \t     \t\t{settings.clean_url+' '*settings.termlength}"[:settings.termlength-100], end="\r")
                                 print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{r.status_code}\t{len(r.content)}\t{int(r.elapsed.total_seconds()*1000)}\t\t{r.url}"[:settings.termlength-100], end="\r")
                         else:
-                            print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t \t \t \t\t{settings.clean_url+' '*settings.termlength}"[:settings.termlength-100], end="\r")
+                            print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t   \t     \t     \t\t{settings.clean_url+' '*settings.termlength}"[:settings.termlength-100], end="\r")
                             print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{r.status_code}\t{len(r.content)}\t{int(r.elapsed.total_seconds()*1000)}\t\t{r.url}"[:settings.termlength-100], end="\r")
 
                     else:
