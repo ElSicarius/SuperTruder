@@ -35,17 +35,21 @@ def main():
     parser.add_argument('-o', '--dumpHtml', help='file to dump html content',)
     args = parser.parse_args()
 
+    if not args.url or not args.payload:
+        print("Error, not enough args")
+        parser.print_usage()
+        exit(42)
+    if args.replaceStr not in args.url:
+        print(f"Error: Missing {args.replaceStr} in URL provided")
+        parser.print_usage()
+        exit(42)
+
     settings = Settings(args)
     set_global(settings)
     print(settings)
     del args
 
-    if not settings.url or not settings.payloadFile:
-        print("Error, not enough args")
-        exit(42)
-    if settings.replaceStr not in settings.url:
-        print(f"Error: Missing {settings.replaceStr} in URL provided")
-        exit(42)
+
 
 
     base_request = get_base_request(settings.url, settings.redir, settings.basePayload)
