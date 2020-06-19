@@ -4,7 +4,6 @@ import os
 import sys
 from requests import get, post
 from urllib.parse import unquote, quote
-import argparse
 import difflib
 import re
 
