@@ -105,8 +105,10 @@ def main():
                                     except Exception as e:
                                         print(f"Error: could not write file {out} Error: {e}")
                             else:
+                                print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t \t \t \t\t{settings.clean_url+' '*settings.termlength}"[:settings.termlength-100], end="\r")
                                 print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{r.status_code}\t{len(r.content)}\t{int(r.elapsed.total_seconds()*1000)}\t\t{r.url}"[:settings.termlength-100], end="\r")
                         else:
+                            print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t \t \t \t\t{settings.clean_url+' '*settings.termlength}"[:settings.termlength-100], end="\r")
                             print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{r.status_code}\t{len(r.content)}\t{int(r.elapsed.total_seconds()*1000)}\t\t{r.url}"[:settings.termlength-100], end="\r")
 
                     else:

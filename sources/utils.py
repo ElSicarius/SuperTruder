@@ -6,6 +6,7 @@ from requests import get, post
 from urllib.parse import unquote, quote
 import argparse
 import difflib
+import re
 
 
 def set_global(settings):
@@ -19,6 +20,7 @@ class Settings:
         self.replaceStr = args.replaceStr
         self.out = args.dumpHtml
         self.url = args.url
+        self.clean_url = "".join(re.findall("https?:\/\/[a-zA-Z.-]+", args.url))
         self.payloadFile = args.payload
         self.basePayload = args.basePayload
         self.threads = int(args.threads)
