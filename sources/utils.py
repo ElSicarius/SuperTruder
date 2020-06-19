@@ -81,7 +81,7 @@ def get_base_request(url, redir, payload):
     print(f"""
 \033[92mBase request info\033[0m:
         \033[1;36mstatus\033[0m: {color_status(req.status_code)}\033[0m,
-        \033[1;36mcontent-length\033[0m: {len(req.text.replace(payload, ''))},
+        \033[1;36mcontent-length\033[0m: {len(req.text)-len(payload)},
         \033[1;36mrequest time\033[0m: {round(req.elapsed.total_seconds()*1000, 3)}\n""")
     return req
 

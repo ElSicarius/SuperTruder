@@ -78,7 +78,7 @@ def main():
             for futu in done:
                 try:
                     r, p = futu.result()
-                    current_status = payload.index(p)
+                    current_status = payload.index(p)-1
                 except Exception as e:
                     #print(f"An Unhandled error occured in thread: {e}")
                     pass
@@ -88,7 +88,7 @@ def main():
                         time_print = str(date_diff).split(".")[0]
                         if not (is_identical(r, base_request, p, settings.basePayload) ^ settings.matchBase):
                             status = r.status_code
-                            response_len = len(r.text.replace(p, ""))
+                            response_len = len(r.text)-len(p)
                             response_time = int(r.elapsed.total_seconds()*1000)
                             # Determine if the http status code is good to be printed
                             go_status = status_matching(status)
