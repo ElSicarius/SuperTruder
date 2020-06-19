@@ -60,13 +60,16 @@ class Settings:
         \033[1;36mTimeout of requests\033[0m: {self.timeout}
         \033[1;36mThreads\033[0m: {self.threads}
         \033[1;36mForce Encoding\033[0m: {"True" if self.forceEncode else "False"}
+        \033[1;36mDumping HTML pages\033[0m: {"True, outfile:"+self.out if self.out else "False"}
 
 \033[92mCurrent Trigger settings\033[0m:
         \033[1;36mSelecting HTTP status code\033[0m: {self.httpcodesFilter}
         {length_message}
         {time_message}
         \033[1;36mExcluding length mathing\033[0m: {self.excludeLength}
-        \033[1;36mTrigger time difference\033[0m: {self.difftimer}"""
+        \033[1;36mTrigger time difference\033[0m: {self.difftimer}
+        \033[1;36mMatch page techniques\033[0m: {"Quick ratio" if self.quick_ratio else "Strict ratio"}
+        \033[1;36mMatch page difference\033[0m: difference <= {self.difference}"""
 
 
 def get_base_request(url, redir, payload):

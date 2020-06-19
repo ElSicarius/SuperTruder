@@ -13,7 +13,7 @@ from .utils import *
 
 def main():
     packages.urllib3.disable_warnings()
-    # Get Options
+
     parser = argparse.ArgumentParser(description='SuperTruder: Fuzz something, somewhere in an URL')
     parser.add_argument('-u', "--url",help='Url to test',)
     parser.add_argument('-p', "--payload",help='payload file',)
@@ -22,7 +22,7 @@ def main():
     parser.add_argument("-l", "--lengthFilter", help='Specify the len range that we\'ll use to accept responses (eg: 0,999 or any, if 3 values, we\'ll accept EXACTLY this values)', default="any,any")
     parser.add_argument("-nl", "--excludeLength", help='Specify the len range that we\'ll use to deny responses (eg: 0,999 or any, if 3 values, we\'ll refuse EXACTLY this values)', default="none,none")
     parser.add_argument("-t", "--timeFilter", help='Specify the time range that we\'ll use to accept responses (eg: 0,999 or any, if 3 values, we\'ll accept EXACTLY this values)', default="any,any")
-    parser.add_argument('-r', "--redir", dest="redir", default=False, action="store_true", help='Allow HTTP redirects',)
+    parser.add_argument('-r', "--redir", dest="redir", default=False, action="store_true", help='Allow HTTP redirects')
     parser.add_argument("-m", '--matchBaseRequest', action="store_true", default=False)
     parser.add_argument("--forceEncode", help="Force URL encode", action="store_true")
     parser.add_argument("--quickRatio", help="Force quick ratio of pages (a bit faster)", action="store_true", default=False)
@@ -32,7 +32,7 @@ def main():
     parser.add_argument("--threads", default=50)
     parser.add_argument("--verify", default=False, action="store_true")
     parser.add_argument("-d","--replaceStr", default="§")
-    parser.add_argument('-o', '--dumpHtml', help='file to dump html content',)
+    parser.add_argument('-o', '--dumpHtml', help='file to dump html content')
     args = parser.parse_args()
 
     if not args.url or not args.payload:
@@ -107,10 +107,10 @@ def main():
                                 print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{status}\t{length}\t{timer}\t\t{url}\033[0m")
                                 if settings.out and len(r.content) != 0:
                                     try:
-                                        with open(f"{settings.out}", 'wb') as f:
+                                        with open(f"{settings.out}", 'ab+') as f:
                                             f.write(r.content)
                                     except Exception as e:
-                                        print(f"Error: could not write file {out} Error: {e}")
+                                        print(f"Error: could not write file {settings.out} Error: {e}")
                             else:
                                 print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t   \t     \t     \t\t{settings.clean_url+' '*settings.termlength}"[:settings.termlength-100], end="\r")
                                 print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{r.status_code}\t{len(r.content)}\t{int(r.elapsed.total_seconds()*1000)}\t\t{r.url}"[:settings.termlength-100], end="\r")
