@@ -38,3 +38,4 @@ I'm using colored printing coz it's beautiful.
 # Todo
 
 - Better print of args (output etc)
+- fix printing \r broken 
