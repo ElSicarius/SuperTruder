@@ -130,13 +130,13 @@ def main():
                         print("Request == None ??")
     except KeyboardInterrupt:
         print(" "*settings.termlength, end="\r")
-        print(f"\033[91m[KILLED] Process cancelled. Info: \ntime=\033[93m{time_print} \n\033[91mPayload index:\033[93m{format(current_status, f'0{len(str(payload_len))}')}/{payload_len} \n\033[91mCurrent URL:\033[93m{r.url}\033[0m"[:settings.termlength-100])
+        print(f"\033[91m[KILLED] Process cancelled. Info: \ntime: \033[93m{time_print} \n\033[91mPayload index: \033[93m{format(current_status, f'0{len(str(payload_len))}')}/{payload_len} \n\033[91mCurrent URL: \033[93m{r.url}\033[0m"[:settings.termlength-100])
         print(f"\033[91m\n[-] Keyboard interrupt recieved, gracefully exiting........... Nah kill everything.\033[0m")
         executor._threads.clear()
         thread._threads_queues.clear()
     except Exception as e:
         print(" "*settings.termlength, end="\r")
-        print(f"\033[91m[KILLED] Process killed. Info: \ntime=\033[93m{time_print} \n\033[91mPayload index:\033[93m{format(current_status, f'0{len(str(payload_len))}')}/{payload_len} \n\033[91mCurrent URL:\033[93m{r.url}\033[0m"[:settings.termlength-100])
+        print(f"\033[91m[KILLED] Process killed. Info: \ntime: \033[93m{time_print} \n\033[91mPayload index: \033[93m{format(current_status, f'0{len(str(payload_len))}')}/{payload_len} \n\033[91mCurrent URL: \033[93m{r.url}\033[0m"[:settings.termlength-100])
         print(f"\033[91m\n[FATAL] Unhandled exception : {e}\033[0m")
         executor._threads.clear()
         thread._threads_queues.clear()
