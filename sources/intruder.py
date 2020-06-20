@@ -57,11 +57,15 @@ def main():
         print(f"Error: cannot read file {settings.payloadFile} Error: {e}")
         exit(42)
 
+    print(f"\033[94mLoading wordlist, please wait...\n\033[0m")
+    payload = set(payloaddata.split('\n'))
+    print(f"\033[1mDone :}} !\033[0m\n")
     ### Attempt connection to each URL and print stats
 
     print("Time\tPayload_index\tStatus\tLength\tResponse_time\tUrl")
     print("-"*100)
-    payload = set(payloaddata.split('\n'))
+
+
     del payloaddata
     payload_len = len(payload)
     now = datetime.now()
