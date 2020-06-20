@@ -37,7 +37,7 @@ I'm using colored printing coz it's beautiful.
 
 # Todo
 
-- Better print of args (output etc)
 - Add headers to request
 
 - Work on a post fuzzing feature
+- Work on a headers fuzzing feature
