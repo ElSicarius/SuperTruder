@@ -49,9 +49,6 @@ def main():
     print(settings)
     del args
 
-
-
-
     base_request = get_base_request(settings.url, settings.redir, settings.basePayload)
     try:
         with open(settings.payloadFile, "r") as f:
@@ -64,7 +61,7 @@ def main():
 
     print("Time\tPayload_index\tStatus\tLength\tResponse_time\tUrl")
     print("-"*100)
-    payload = payloaddata.split('\n')
+    payload = set(payloaddata.split('\n'))
     del payloaddata
     payload_len = len(payload)
     now = datetime.now()
@@ -88,7 +85,7 @@ def main():
                         time_print = str(date_diff).split(".")[0]
                         if not (is_identical(r, base_request, p, settings.basePayload) ^ settings.matchBase):
                             status = r.status_code
-                            response_len = len(r.text)-len(p)
+                            response_len = len(r.text)-(len(p))
                             response_time = int(r.elapsed.total_seconds()*1000)
                             # Determine if the http status code is good to be printed
                             go_status = status_matching(status)
