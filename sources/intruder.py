@@ -24,6 +24,7 @@ def main():
     parser.add_argument("-t", "--timeFilter", help='Specify the time range that we\'ll use to accept responses (eg: 0,999 or any, if 3 values, we\'ll accept EXACTLY this values)', default="any,any")
     parser.add_argument('-r', "--redir", dest="redir", default=False, action="store_true", help='Allow HTTP redirects')
     parser.add_argument("-m", '--matchBaseRequest', action="store_true", default=False)
+    parser.add_argument("--offset", help="Start over where you stopped by giving the payload offset", default=0)
     parser.add_argument("--forceEncode", help="Force URL encode", action="store_true")
     parser.add_argument("--quickRatio", help="Force quick ratio of pages (a bit faster)", action="store_true", default=False)
     parser.add_argument("--textDifference", help="Percentage difference to match pages default: 99%", default=0.99)
@@ -57,9 +58,13 @@ def main():
         print(f"Error: cannot read file {settings.payloadFile} Error: {e}")
         exit(42)
 
-    print(f"\033[94mLoading wordlist, please wait...\n\033[0m")
-    payload = set(payloaddata.split('\n'))
-    print(f"\033[1mDone :}} !\033[0m\n")
+    # payload file processing
+    print(f"\033[94mLoading wordlist, sorting uniq etc. please wait...\033[0m")
+    payload = list(payloaddata.split('\n'))
+    payload_len = len(payload)
+    if settings.payload_offset > 0:
+        print(f"\033[93mStarting from the payload n°{settings.payload_offset}/{payload_len}: '{payload[settings.payload_offset]}'\033[0m")
+    print(f"\033[1mLoading done :}} !\033[0m\n")
     ### Attempt connection to each URL and print stats
 
     print("Time\tPayload_index\tStatus\tLength\tResponse_time\tUrl")
@@ -67,19 +72,21 @@ def main():
 
 
     del payloaddata
-    payload_len = len(payload)
+
+
+
     now = datetime.now()
     current_status = 0
     futures = set()
     try:
         executor = ThreadPoolExecutor(max_workers=settings.threads)
-        futures.update({executor.submit(get_, settings.url.replace(settings.replaceStr, quote(p) if settings.forceEncode else p), p) for p in payload } )
+        futures.update({executor.submit(get_, settings.url.replace(settings.replaceStr, quote(p) if settings.forceEncode else p), p) for p in payload[settings.payload_offset:] } )
         while futures:
             done, futures = wait(futures, return_when=FIRST_COMPLETED)
             for futu in done:
                 try:
                     r, p = futu.result()
-                    current_status = payload.index(p)-1
+                    current_status = payload.index(p)
                 except Exception as e:
                     #print(f"An Unhandled error occured in thread: {e}")
                     pass
@@ -122,12 +129,15 @@ def main():
                     else:
                         print("Request == None ??")
     except KeyboardInterrupt:
-        print(f"{' '*(settings.termlength-1)}", end="\r")
-        print(f"\033[91m[-] Keyboard interrupt recieved, gracefully exiting........... Nah kill everything.\033[0m")
+        print(" "*settings.termlength, end="\r")
+        print(f"\033[91m[KILLED] Process cancelled. Info: \ntime=\033[93m{time_print} \n\033[91mPayload index:\033[93m{format(current_status, f'0{len(str(payload_len))}')}/{payload_len} \n\033[91mCurrent URL:\033[93m{r.url}\033[0m"[:settings.termlength-100])
+        print(f"\033[91m\n[-] Keyboard interrupt recieved, gracefully exiting........... Nah kill everything.\033[0m")
         executor._threads.clear()
         thread._threads_queues.clear()
     except Exception as e:
-        print(f"\033[91m[FATAL] Unhandled exception : {e}\033[0m")
+        print(" "*settings.termlength, end="\r")
+        print(f"\033[91m[KILLED] Process killed. Info: \ntime=\033[93m{time_print} \n\033[91mPayload index:\033[93m{format(current_status, f'0{len(str(payload_len))}')}/{payload_len} \n\033[91mCurrent URL:\033[93m{r.url}\033[0m"[:settings.termlength-100])
+        print(f"\033[91m\n[FATAL] Unhandled exception : {e}\033[0m")
         executor._threads.clear()
         thread._threads_queues.clear()
 

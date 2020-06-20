@@ -34,6 +34,7 @@ class Settings:
         self.verify = args.verify
         self.quick_ratio = args.quickRatio
         self.difference = args.textDifference
+        self.payload_offset = int(args.offset)
 
     def __str__(self):
         if "any,any" in self.lengthFilter:
