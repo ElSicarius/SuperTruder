@@ -2,7 +2,8 @@
 An intruder custom that gave me bounties
 
 ```
-usage: supertruder.py [-h] [-u URL] [-p PAYLOAD] [-b BASEPAYLOAD] [-f FILTER] [-l LENGTHFILTER] [-nl EXCLUDELENGTH] [-t TIMEFILTER] [-r] [-m] [--difftimer DIFFTIMER] [--timeout TIMEOUT] [--threads THREADS] [-d REPLACESTR] [-o DUMPHTML]
+usage: supertruder.py [-h] [-u URL] [-p PAYLOAD] [-b BASEPAYLOAD] [-f FILTER] [-l LENGTHFILTER] [-nl EXCLUDELENGTH] [-t TIMEFILTER] [-r] [-m] [--offset OFFSET] [--forceEncode] [--quickRatio] [--textDifference TEXTDIFFERENCE] [--difftimer DIFFTIMER] [--timeout TIMEOUT]
+                      [--threads THREADS] [--verify] [-d REPLACESTR] [-o DUMPHTML]
 
 SuperTruder: Fuzz something, somewhere in an URL
 
@@ -23,10 +24,16 @@ optional arguments:
                         Specify the time range that we'll use to accept responses (eg: 0,999 or any, if 3 values, we'll accept EXACTLY this values)
   -r, --redir           Allow HTTP redirects
   -m, --matchBaseRequest
+  --offset OFFSET       Start over where you stopped by giving the payload offset
+  --forceEncode         Force URL encode
+  --quickRatio          Force quick ratio of pages (a bit faster)
+  --textDifference TEXTDIFFERENCE
+                        Percentage difference to match pages default: 99%
   --difftimer DIFFTIMER
                         Change the default matching timer (default 2000ms -> 2 seconds)
   --timeout TIMEOUT
   --threads THREADS
+  --verify
   -d REPLACESTR, --replaceStr REPLACESTR
   -o DUMPHTML, --dumpHtml DUMPHTML
                         file to dump html content

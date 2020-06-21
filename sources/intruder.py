@@ -27,7 +27,7 @@ def main():
     parser.add_argument("--offset", help="Start over where you stopped by giving the payload offset", default=0)
     parser.add_argument("--forceEncode", help="Force URL encode", action="store_true")
     parser.add_argument("--quickRatio", help="Force quick ratio of pages (a bit faster)", action="store_true", default=False)
-    parser.add_argument("--textDifference", help="Percentage difference to match pages default: 99%", default=0.99)
+    parser.add_argument("--textDifference", help="Percentage difference to match pages default: 99%%", default=0.99)
     parser.add_argument("--difftimer", help="Change the default matching timer (default 2000ms -> 2 seconds)", default=2000)
     parser.add_argument("--timeout", default=20)
     parser.add_argument("--threads", default=50)
@@ -38,11 +38,11 @@ def main():
 
     if not args.url or not args.payload:
         print("Error, not enough args")
-        parser.print_usage()
+        parser.print_help()
         exit(42)
     if args.replaceStr not in args.url:
         print(f"Error: Missing {args.replaceStr} in URL provided")
-        parser.print_usage()
+        parser.print_help()
         exit(42)
 
     settings = Settings(args)
