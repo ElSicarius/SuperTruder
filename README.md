@@ -48,3 +48,7 @@ I'm using colored printing coz it's beautiful.
 
 - Work on a post fuzzing feature
 - Work on a headers fuzzing feature
+
+# It's beautiful
+
+https://asciinema.org/a/8ISmRJSnqop9j0cBW6GlpB5Wr

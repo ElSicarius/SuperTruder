@@ -17,6 +17,9 @@ def main():
     parser = argparse.ArgumentParser(description='SuperTruder: Fuzz something, somewhere in an URL')
     parser.add_argument('-u', "--url",help='Url to test',)
     parser.add_argument('-p', "--payload",help='payload file',)
+    parser.add_argument("-d", "--data", help="data for post request", default=None)
+    parser.add_argument("-j", "--json", help="json for post request", default=None)
+    parser.add_argument("-H", "--header", help="Give some extra headers, format: {'header_name': 'header Value'}", default='{}')
     parser.add_argument('-b', "--basePayload", help="Payload for base request", default="Sicarius")
     parser.add_argument("-f", "--filter", help="Filter positives match with httpcode, comma separated, to exclude one: n200", default='any')
     parser.add_argument("-l", "--lengthFilter", help='Specify the len range that we\'ll use to accept responses (eg: 0,999 or any, if 3 values, we\'ll accept EXACTLY this values)', default="any,any")
@@ -32,7 +35,7 @@ def main():
     parser.add_argument("--timeout", default=20)
     parser.add_argument("--threads", default=50)
     parser.add_argument("--verify", default=False, action="store_true")
-    parser.add_argument("-d","--replaceStr", default="§")
+    parser.add_argument("-S","--replaceStr", default="§")
     parser.add_argument('-o', '--dumpHtml', help='file to dump html content')
     args = parser.parse_args()
 
@@ -40,8 +43,19 @@ def main():
         print("Error, not enough args")
         parser.print_help()
         exit(42)
-    if args.replaceStr not in args.url:
-        print(f"Error: Missing {args.replaceStr} in URL provided")
+    print(args.url, args.data, args.json, args.header)
+    print((args.replaceStr not in args.url) , ((args.data != None) and (args.replaceStr not in args.data)) ,  ((args.json != None) and (args.replaceStr not in args.json)) , (args.header != {} and (args.replaceStr not in args.header)))
+    if  ( not(args.replaceStr not in args.url) \
+        and (args.data and (args.replaceStr not in args.data))\
+            and  (args.json and (args.replaceStr not in args.json))\
+                and (args.header != {} and (args.replaceStr not in args.header)) ):
+
+        print(f"Error: Missing {args.replaceStr} in URL/Json/Data/Header provided")
+        parser.print_help()
+        exit(42)
+
+    if args.data and args.json:
+        print(f"Error, you've provided json & data ? that's dumb")
         parser.print_help()
         exit(42)
 
@@ -61,6 +75,7 @@ def main():
     # payload file processing
     print(f"\033[94mLoading wordlist, sorting uniq etc. please wait...\033[0m")
     payload = list(payloaddata.split('\n'))
+    del payloaddata
     payload_len = len(payload)
     if settings.payload_offset > 0:
         print(f"\033[93mStarting from the payload n°{settings.payload_offset}/{payload_len}: '{payload[settings.payload_offset]}'\033[0m")
@@ -71,16 +86,26 @@ def main():
     print("-"*100)
 
 
-    del payloaddata
-
-
-
     now = datetime.now()
     current_status = 0
     futures = set()
     try:
         executor = ThreadPoolExecutor(max_workers=settings.threads)
-        futures.update({executor.submit(get_, settings.url.replace(settings.replaceStr, quote(p) if settings.forceEncode else p), p) for p in payload[settings.payload_offset:] } )
+        if settings.method == "GET":
+            futures.update({executor.submit(get_, replace_string(settings.url, p), p) for p in payload[settings.payload_offset:] } )
+        if settings.method == "POST":
+            replacePost = True if settings.replaceStr in settings.data else False
+            replaceUrl = True if settings.replaceStr in settings.url else False
+
+            futures.update({executor.submit(post_, data.replace(settings.url,p) if replaceUrl else settings.url\
+                , data.replace(settings.data) if replacePost else settings.data, p) for p in payload[settings.payload_offset:] } )
+        if settings.method == "JSON":
+            replaceJson = True if settings.replaceStr in settings.json else False
+            replaceUrl = True if settings.replaceStr in settings.url else False
+
+            futures.update({executor.submit(json_, data.replace(settings.url,p) if replaceUrl else settings.url\
+                , data.replace(settings.json) if replaceJson else settings.data, p) for p in payload[settings.payload_offset:] } )
+
         while futures:
             done, futures = wait(futures, return_when=FIRST_COMPLETED)
             for futu in done:
@@ -88,7 +113,7 @@ def main():
                     r, p = futu.result()
                     current_status = payload.index(p)
                 except Exception as e:
-                    #print(f"An Unhandled error occured in thread: {e}")
+                    print(f"An Unhandled error occured in thread: {e}")
                     pass
                 else:
                     if r != None:
@@ -116,6 +141,7 @@ def main():
                                 if settings.out and len(r.content) != 0:
                                     try:
                                         with open(f"{settings.out}", 'ab+') as f:
+                                            f.write(settings.dump_request())
                                             f.write(r.content)
                                     except Exception as e:
                                         print(f"Error: could not write file {settings.out} Error: {e}")

@@ -6,6 +6,7 @@ from requests import get, post
 from urllib.parse import unquote, quote
 import difflib
 import re
+import json
 
 
 def set_global(settings):
@@ -35,6 +36,25 @@ class Settings:
         self.quick_ratio = args.quickRatio
         self.difference = float(args.textDifference)
         self.payload_offset = int(args.offset)
+        self.header = json.loads(args.header)
+        if args.data:
+            self.method = "POST"
+        elif args.json:
+            self.method = "JSON"
+        else:
+            self.method = "GET"
+
+
+    def dump_request(self):
+        return_string = b""
+        if self.method == "GET":
+            return_string = f"URL:{settings.url:b}"
+        if self.method == "POST":
+            return_string = f"URL:{settings.url:b}; data:{settings.data:b}"
+        if self.method == "JSON":
+            return_string = f"URL:{settings.url:b}; json:{settings.json:b}"
+        return return_string
+
 
     def __str__(self):
         if "any,any" in self.lengthFilter:
@@ -50,7 +70,6 @@ class Settings:
             time_message = f"\033[1;36mSelecting responses time following\033[0m: {self.timeFilter[0]} <= time \033[0m<= {self.timeFilter[1]}"
         else:
             time_message = f"\033[1;36mSelecting responses time is in\033[0m: {self.timeFilter}"
-
 
         return f"""
 \033[92mCurrent global settings\033[0m:
@@ -75,10 +94,11 @@ class Settings:
 
 def get_base_request(url, redir, payload):
     try:
-        req = get(url.replace(settings.replaceStr, payload), allow_redirects=settings.redir, verify=settings.verify)
+        req = get(url.replace(settings.replaceStr, payload), allow_redirects=settings.redir, verify=settings.verify, headers=settings.header, timeout=settings.timeout)
     except Exception as e:
         print(f"An error occured while requesting base request, Stopping here. Error: {e}")
         exit(42)
+
     print(f"""
 \033[92mBase request info\033[0m:
         \033[1;36mstatus\033[0m: {color_status(req.status_code)}\033[0m,
@@ -213,7 +233,28 @@ def color_status(status):
 
 
 def get_(url, parameter):
-    return (get(url, timeout=settings.timeout, allow_redirects=settings.redir, verify=settings.verify), parameter)
+    h = settings.header
+    if settings.replaceStr in settings.header:
+        h = json.loads(replace_string(str(h), parameter))
+    return (get(url, timeout=settings.timeout, allow_redirects=settings.redir, verify=settings.verify, headers=h), parameter)
+
+
+def post_(url, data, parameter):
+    h = settings.header
+    if settings.replaceStr in settings.header:
+        h = json.loads(replace_string(str(h), parameter))
+    return (post(url, timeout=settings.timeout, allow_redirects=settings.redir, verify=settings.verify, headers=settings.header, data=data), parameter)
+
+
+def json_(url, json, parameter):
+    h = settings.header
+    if settings.replaceStr in settings.header:
+        h = json.loads(replace_string(str(h), parameter))
+    return (post(url, timeout=settings.timeout, allow_redirects=settings.redir, verify=settings.verify, headers=settings.header, json=json), parameter)
+
+
+def replace_string(data, repl):
+    return data.replace(settings.replaceStr, quote(repl) if settings.forceEncode else repl)
 
 
 def status_matching(status):
