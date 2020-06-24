@@ -43,21 +43,6 @@ def main():
         print("Error, not enough args")
         parser.print_help()
         exit(42)
-    print(args.url, args.data, args.json, args.header)
-    print((args.replaceStr not in args.url) , ((args.data != None) and (args.replaceStr not in args.data)) ,  ((args.json != None) and (args.replaceStr not in args.json)) , (args.header != {} and (args.replaceStr not in args.header)))
-    if  ( not(args.replaceStr not in args.url) \
-        and (args.data and (args.replaceStr not in args.data))\
-            and  (args.json and (args.replaceStr not in args.json))\
-                and (args.header != {} and (args.replaceStr not in args.header)) ):
-
-        print(f"Error: Missing {args.replaceStr} in URL/Json/Data/Header provided")
-        parser.print_help()
-        exit(42)
-
-    if args.data and args.json:
-        print(f"Error, you've provided json & data ? that's dumb")
-        parser.print_help()
-        exit(42)
 
     settings = Settings(args)
     set_global(settings)
@@ -82,8 +67,7 @@ def main():
     print(f"\033[1mLoading done :}} !\033[0m\n")
     ### Attempt connection to each URL and print stats
 
-    print("Time\tPayload_index\tStatus\tLength\tResponse_time\tUrl")
-    print("-"*100)
+    print_header()
 
 
     now = datetime.now()
@@ -93,12 +77,14 @@ def main():
         executor = ThreadPoolExecutor(max_workers=settings.threads)
         if settings.method == "GET":
             futures.update({executor.submit(get_, replace_string(settings.url, p), p) for p in payload[settings.payload_offset:] } )
+
         if settings.method == "POST":
             replacePost = True if settings.replaceStr in settings.data else False
             replaceUrl = True if settings.replaceStr in settings.url else False
 
             futures.update({executor.submit(post_, data.replace(settings.url,p) if replaceUrl else settings.url\
                 , data.replace(settings.data) if replacePost else settings.data, p) for p in payload[settings.payload_offset:] } )
+
         if settings.method == "JSON":
             replaceJson = True if settings.replaceStr in settings.json else False
             replaceUrl = True if settings.replaceStr in settings.url else False
@@ -137,7 +123,7 @@ def main():
                                 timer = str(response_time)
                                 url = unquote(r.url)
                                 print(f"{' '*(settings.termlength)}", end="\r")
-                                print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{status}\t{length}\t{timer}\t\t{url}\033[0m")
+                                print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{status}\t{length}\t{timer}\t\t{p}\033[0m")
                                 if settings.out and len(r.content) != 0:
                                     try:
                                         with open(f"{settings.out}", 'ab+') as f:
@@ -146,12 +132,9 @@ def main():
                                     except Exception as e:
                                         print(f"Error: could not write file {settings.out} Error: {e}")
                             else:
-                                print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t   \t     \t     \t\t{settings.clean_url}{' '*settings.termlength}"[:settings.termlength-50], end="\r")
-                                print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{r.status_code}\t{len(r.content)}\t{int(r.elapsed.total_seconds()*1000)}\t\t{r.url}"[:settings.termlength], end="\r")
+                                print_nothing(time_print,current_status, payload_len, r, p)
                         else:
-                            print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t   \t     \t     \t\t{settings.clean_url}{' '*settings.termlength}"[:settings.termlength-50], end="\r")
-                            print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{r.status_code}\t{len(r.content)}\t{int(r.elapsed.total_seconds()*1000)}\t\t{r.url}"[:settings.termlength], end="\r")
-
+                            print_nothing(time_print,current_status, payload_len, r, p)
                     else:
                         print("Request == None ??")
     except KeyboardInterrupt:

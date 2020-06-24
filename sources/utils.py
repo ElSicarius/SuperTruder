@@ -37,12 +37,61 @@ class Settings:
         self.difference = float(args.textDifference)
         self.payload_offset = int(args.offset)
         self.header = json.loads(args.header)
+        #self.args = args
+        self.data = args.data
+        self.json = args.json
         if args.data:
             self.method = "POST"
+
         elif args.json:
             self.method = "JSON"
+
         else:
             self.method = "GET"
+
+        # Then
+        self.print_str = self.locate_str()
+        self.check_if_go()
+
+    def locate_str(self):
+        where = str()
+
+        if self.replaceStr in self.url:
+            indexPosList = [ i for i in range(len(self.url)) if self.url[i] == self.replaceStr ][-1]
+            try:
+                where += self.url[indexPosList-6:indexPosList+1]+"\t"
+            except IndexError:
+                where += self.replaceStr+"\t"
+
+        if self.header != {} :
+            if self.replaceStr in str(self.header):
+
+                indexPosList = [ i for i in range(len(str(self.header))) if str(self.header)[i] == self.replaceStr ][-1]
+
+                try:
+                    where += str(self.header)[indexPosList-6:indexPosList+1]+"\t"
+
+                except IndexError:
+                    where += self.replaceStr+"\t"
+
+
+
+        if self.data != None:
+            if self.replaceStr in self.data:
+                indexPosList = [ i for i in range(len(self.data)) if self.data[i] == self.replaceStr ][-1]
+                try:
+                    where += self.data[indexPosList-6:indexPosList+1]+"\t"
+                except IndexError:
+                    where += self.replaceStr+"\t"
+
+        if self.json != None:
+            if self.replaceStr in str(self.json):
+                indexPosList = [ i for i in range(len(str(self.json))) if str(self.json)[i] == self.replaceStr ][-1]
+                try:
+                    where += str(self.json)[indexPosList-6:indexPosList+1]+"\t"
+                except IndexError:
+                    where += self.replaceStr+"\t"
+        return where
 
 
     def dump_request(self):
@@ -55,6 +104,21 @@ class Settings:
             return_string = f"URL:{settings.url:b}; json:{settings.json:b}"
         return return_string
 
+
+    def check_if_go(self):
+        if self.data and self.json:
+            print(f"Error, you've provided json & data ? that's dumb")
+            parser.print_help()
+            exit(42)
+        if (self.method == "GET" and (not self.replaceStr in self.url and not self.replaceStr in str(self.header))):
+            print(f"Error: Missing {self.replaceStr} in URL/Header provided")
+            exit(42)
+        if (self.method == "POST" and (not self.replaceStr in self.url and not self.replaceStr in str(self.header) and not self.replaceStr in self.data)):
+            print(f"Error: Missing {self.replaceStr} in URL/Data/Header provided")
+            exit(42)
+        if (self.method == "JSON" and (not self.replaceStr in self.url and not self.replaceStr in str(self.header) and not self.replaceStr in self.json)):
+            print(f"Error: Missing {self.replaceStr} in URL/Json/Header provided")
+            exit(42)
 
     def __str__(self):
         if "any,any" in self.lengthFilter:
@@ -93,12 +157,14 @@ class Settings:
 
 
 def get_base_request(url, redir, payload):
+    h = settings.header
+    if settings.replaceStr in str(settings.header):
+        h = json.loads(replace_string(str(h), payload).replace("'",'"'))
     try:
-        req = get(url.replace(settings.replaceStr, payload), allow_redirects=settings.redir, verify=settings.verify, headers=settings.header, timeout=settings.timeout)
+        req = get(url.replace(settings.replaceStr, payload), allow_redirects=settings.redir, verify=settings.verify, headers=h, timeout=settings.timeout)
     except Exception as e:
         print(f"An error occured while requesting base request, Stopping here. Error: {e}")
         exit(42)
-
     print(f"""
 \033[92mBase request info\033[0m:
         \033[1;36mstatus\033[0m: {color_status(req.status_code)}\033[0m,
@@ -235,26 +301,50 @@ def color_status(status):
 def get_(url, parameter):
     h = settings.header
     if settings.replaceStr in settings.header:
-        h = json.loads(replace_string(str(h), parameter))
+        h = json.loads(replace_string(str(h), parameter).replace("'",'"'))
     return (get(url, timeout=settings.timeout, allow_redirects=settings.redir, verify=settings.verify, headers=h), parameter)
 
 
 def post_(url, data, parameter):
     h = settings.header
     if settings.replaceStr in settings.header:
-        h = json.loads(replace_string(str(h), parameter))
-    return (post(url, timeout=settings.timeout, allow_redirects=settings.redir, verify=settings.verify, headers=settings.header, data=data), parameter)
+        h = json.loads(replace_string(str(h), parameter).replace("'",'"'))
+    return (post(url, timeout=settings.timeout, allow_redirects=settings.redir, verify=settings.verify, headers=h, data=data), parameter)
 
 
 def json_(url, json, parameter):
     h = settings.header
     if settings.replaceStr in settings.header:
-        h = json.loads(replace_string(str(h), parameter))
-    return (post(url, timeout=settings.timeout, allow_redirects=settings.redir, verify=settings.verify, headers=settings.header, json=json), parameter)
+        h = json.loads(replace_string(str(h), parameter).replace("'",'"'))
+    return (post(url, timeout=settings.timeout, allow_redirects=settings.redir, verify=settings.verify, headers=h, json=json), parameter)
 
 
 def replace_string(data, repl):
     return data.replace(settings.replaceStr, quote(repl) if settings.forceEncode else repl)
+
+
+def print_nothing(time_print,current_status, payload_len, r, parameter, end="\r"):
+    pay = replace_string(settings.print_str, parameter)
+    print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t   \t     \t     \t\t{' '*settings.termlength}"[:settings.termlength-50], end="\r")
+    print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{r.status_code}\t{len(r.content)}\t{int(r.elapsed.total_seconds()*1000)}\t\t{pay}"[:settings.termlength-50], end="\r")
+
+
+def print_header():
+    temp = "Time\tPayload_index\tStatus\tLength\tResponse_time\t"
+    if settings.replaceStr in settings.url:
+        temp += "Url\t"
+    if settings.header != {} :
+        if settings.replaceStr in str(settings.header):
+            temp += "Header\t"
+    if settings.data != None:
+        if settings.replaceStr in settings.data:
+            temp += "Data\t"
+    if settings.json != None:
+        if settings.replaceStr in settings.json:
+            temp += "Json\t"
+
+    print(temp)
+    print("-"*150)
 
 
 def status_matching(status):
