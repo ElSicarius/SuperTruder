@@ -42,11 +42,12 @@ def main():
     if not args.url or not args.payload:
         print("Error, not enough args")
         parser.print_help()
+        end_clean()
         exit(42)
 
     settings = Settings(args)
     set_global(settings)
-    print(settings)
+    settings.__str__()
     del args
 
     base_request = get_base_request(settings.url, settings.redir, settings.basePayload)
@@ -55,20 +56,20 @@ def main():
             payloaddata = f.read()
     except Exception as e:
         print(f"Error: cannot read file {settings.payloadFile} Error: {e}")
+        end_clean()
         exit(42)
 
     # payload file processing
-    print(f"\033[94mLoading wordlist, sorting uniq etc. please wait...\033[0m")
+    print_cursor("Loading wordlist, sorting uniq etc. please wait...", y="c", color="b")
     payload = list(payloaddata.split('\n'))
     del payloaddata
     payload_len = len(payload)
     if settings.payload_offset > 0:
         print(f"\033[93mStarting from the payload n°{settings.payload_offset}/{payload_len}: '{payload[settings.payload_offset]}'\033[0m")
-    print(f"\033[1mLoading done :}} !\033[0m\n")
+    print_cursor(f"Loading done :}} !", y="c", color="n")
     ### Attempt connection to each URL and print stats
 
     print_header()
-
 
     now = datetime.now()
     current_status = 0
@@ -107,7 +108,7 @@ def main():
                         time_print = str(date_diff).split(".")[0]
                         if not (is_identical(r, base_request, p, settings.basePayload) ^ settings.matchBase):
                             status = r.status_code
-                            response_len = len(r.text)-(len(p))
+                            response_len = len(r.text)-(len(p)) if p in r.text else len(r.text)
                             response_time = int(r.elapsed.total_seconds()*1000)
                             # Determine if the http status code is good to be printed
                             go_status = status_matching(status)
@@ -118,12 +119,12 @@ def main():
                             # print status message only if httpcode & len are ok
                             if go_status and go_length and go_time:
                                 status = str(status)
-                                status = color_status(status)
+                                color, status = color_status(status)
                                 length = str(response_len)
                                 timer = str(response_time)
                                 url = unquote(r.url)
-                                print(f"{' '*(settings.termlength)}", end="\r")
-                                print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{status}\t{length}\t{timer}\t\t{p}\033[0m")
+                                print_cursor(f"{' '*(settings.termlength)}", y="c", x=0)
+                                print_cursor(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{status}\t{length}\t{timer}\t\t{p}", y="c", x=0, color=color, pad=(-1))
                                 if settings.out and len(r.content) != 0:
                                     try:
                                         with open(f"{settings.out}", 'ab+') as f:
@@ -135,22 +136,38 @@ def main():
                                 print_nothing(time_print,current_status, payload_len, r, p)
                         else:
                             print_nothing(time_print,current_status, payload_len, r, p)
-                    else:
-                        print("Request == None ??")
+
     except KeyboardInterrupt:
-        print(" "*settings.termlength, end="\r")
-        print(f"\033[91m[KILLED] Process cancelled. Info: \ntime: \033[93m{time_print} \n\033[91mPayload index: \033[93m{format(current_status, f'0{len(str(payload_len))}')}/{payload_len} \n\033[91mCurrent URL: \033[93m{r.url}\033[0m"[:settings.termlength-100])
-        print(f"\033[91m\n[-] Keyboard interrupt recieved, gracefully exiting........... Nah kill everything.\033[0m")
+        print_cursor(f"{' '*(settings.termlength)}", y="c", x=0)
+        print_cursor(f"{' '*(settings.termlength)}", y="c", x=0)
+        print_cursor(f"[KILLED] Process cancelled. Info:", y="c", x=0, color="f", pad=(-1))
+        print_cursor("time: ", y="c", x=0, color="f"); print_cursor(f"{time_print}", color="w", pad=(-1))
+        print_cursor("Payload index: ", y="c", x=0, color="f"); print_cursor(f"{format(current_status, f'0{len(str(payload_len))}')}/{payload_len} ", color="w")
+        print_cursor("Current URL: ", y="c", x=0, color="f"); print_cursor(f"{r.url}"[:settings.termlength-100], color="w")
+        print_cursor(f"\n[FATAL] Keyboard interrupt recieved, gracefully exiting........... Nah kill everything.", color="f")
+
         executor._threads.clear()
         thread._threads_queues.clear()
+        end_clean()
     except Exception as e:
-        print(" "*settings.termlength, end="\r")
-        print(f"\033[91m[KILLED] Process killed. Info: \ntime: \033[93m{time_print} \n\033[91mPayload index: \033[93m{format(current_status, f'0{len(str(payload_len))}')}/{payload_len} \n\033[91mCurrent URL: \033[93m{r.url}\033[0m"[:settings.termlength-100])
-        print(f"\033[91m\n[FATAL] Unhandled exception : {e}\033[0m")
+        print_cursor(f"{' '*(settings.termlength)}", y="c", x=0)
+        print_cursor(f"{' '*(settings.termlength)}", y="c", x=0)
+        print_cursor(f"[KILLED] Process killed. Info: ", y="c", x=0, color="f", pad=(-1))
+        print_cursor("time: ", y="c", x=0, color="f"); print_cursor(f"{time_print}", color="w")
+        print_cursor(f"Payload index: {format(current_status, f'0{len(str(payload_len))}')}/{payload_len}", y="c", x=0, color="f")
+        print_cursor(f"Current URL: {r.url}"[:settings.termlength-100], y="c", x=0, color="f")
+        print_cursor(f"[FATAL] Unhandled exception : {e}", y="c", x=0, color="f")
+
         executor._threads.clear()
         thread._threads_queues.clear()
+        end_clean()
+
+    # reset terminal -> dirty
+
+
 
     print("\033[94m[+] Done\033[0m" + " "* settings.termlength)
 
 if __name__ == '__main__':
+
     main()
