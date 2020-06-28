@@ -14,28 +14,28 @@ def set_global(settings):
 
 class Settings:
     def __init__(self,args):
-        self.termlength = int(os.get_terminal_size()[0])
-        self.redir = args.redir
-        self.replaceStr = args.replaceStr
-        self.out = args.dumpHtml
-        self.url = args.url
-        self.clean_url = "".join(re.findall("https?:\/\/[a-z\dA-Z.-]+", args.url))
-        self.payloadFile = args.payload
         self.basePayload = args.basePayload
-        self.threads = int(args.threads)
-        self.timeout = int(args.timeout)
-        self.matchBase = args.matchBaseRequest
+        self.url = args.url
+        self.clean_url = "".join(re.findall("https?:\/\/[a-z\dA-Z.-]+", self.url))
+        self.difference = float(args.textDifference)
+        self.difftimer = args.difftimer
+        self.excludeLength = parse_excluded_length(args.excludeLength)
+        self.forceEncode = args.forceEncode
         self.httpcodesFilter = parse_filter(args.filter)
         self.lengthFilter = parse_length_time_filter(args.lengthFilter)
-        self.timeFilter = parse_length_time_filter(args.timeFilter)
-        self.excludeLength = parse_excluded_length(args.excludeLength)
-        self.difftimer = args.difftimer
-        self.forceEncode = args.forceEncode
-        self.verify = args.verify
-        self.quick_ratio = args.quickRatio
-        self.difference = float(args.textDifference)
+        self.matchBase = args.matchBaseRequest
+        self.out = args.dumpHtml
+        self.payloadFile = args.payload
         self.payload_offset = int(args.offset)
-
+        self.quick_ratio = args.quickRatio
+        self.redir = args.redir
+        self.replaceStr = args.replaceStr
+        self.termlength = int(os.get_terminal_size()[0])
+        self.threads = int(args.threads)
+        self.timeFilter = parse_length_time_filter(args.timeFilter)
+        self.timeout = int(args.timeout)
+        self.uselessprint = not args.uselessprint
+        self.verify = args.verify
     def __str__(self):
         if "any,any" in self.lengthFilter:
             length_message = "\033[1;36mSelecting length matching\033[0m: any"
@@ -155,6 +155,16 @@ def parse_excluded_length(arg):
             exit(42)
 
         return [splitted]
+
+
+def replace_string(data, repl):
+    return data.replace(settings.replaceStr, quote(repl) if settings.forceEncode else repl)
+
+
+def print_nothing(time_print,current_status, payload_len, r, parameter, end="\r"):
+    if settings.uselessprint:
+        print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t   \t     \t     \t\t{' '*settings.termlength}"[:settings.termlength-50], end="\r")
+        print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{r.status_code}\t{len(r.content)}\t{int(r.elapsed.total_seconds()*1000)}\t\t{parameter}"[:settings.termlength-50], end="\r")
 
 
 def length_matching(response_len):
