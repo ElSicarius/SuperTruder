@@ -6,8 +6,6 @@ from requests import get, post
 from urllib.parse import unquote, quote
 import difflib
 import re
-import json
-import curses
 
 
 def set_global(settings):
@@ -16,7 +14,7 @@ def set_global(settings):
 
 class Settings:
     def __init__(self,args):
-        self.termlength, self.termlength_y = int(os.get_terminal_size()[0]), int(os.get_terminal_size()[1])
+        self.termlength = int(os.get_terminal_size()[0])
         self.redir = args.redir
         self.replaceStr = args.replaceStr
         self.out = args.dumpHtml
@@ -37,175 +35,55 @@ class Settings:
         self.quick_ratio = args.quickRatio
         self.difference = float(args.textDifference)
         self.payload_offset = int(args.offset)
-        self.header = json.loads(args.header)
-        #self.args = args
-        self.data = args.data
-        self.json = args.json
-        if args.data:
-            self.method = "POST"
-        elif args.json:
-            self.method = "JSON"
-        else:
-            self.method = "GET"
-
-        # Then
-        self.print_str = self.locate_str()
-        self.check_if_go()
-        self.init_curses()
-
-    def locate_str(self):
-        where = str()
-
-        if self.replaceStr in self.url:
-            indexPosList = [ i for i in range(len(self.url)) if self.url[i] == self.replaceStr ][-1]
-            try:
-                where += self.url[indexPosList-1:indexPosList+1]+"\t"
-            except IndexError:
-                where += self.replaceStr+"\t"
-
-        if self.header != {} :
-            if self.replaceStr in str(self.header):
-
-                indexPosList = [ i for i in range(len(str(self.header))) if str(self.header)[i] == self.replaceStr ][-1]
-
-                try:
-                    where += str(self.header)[indexPosList-1:indexPosList+1]+"\t"
-
-                except IndexError:
-                    where += self.replaceStr+"\t"
-
-
-
-        if self.data != None:
-            if self.replaceStr in self.data:
-                indexPosList = [ i for i in range(len(self.data)) if self.data[i] == self.replaceStr ][-1]
-                try:
-                    where += self.data[indexPosList-1:indexPosList+1]+"\t"
-                except IndexError:
-                    where += self.replaceStr+"\t"
-
-        if self.json != None:
-            if self.replaceStr in str(self.json):
-                indexPosList = [ i for i in range(len(str(self.json))) if str(self.json)[i] == self.replaceStr ][-1]
-                try:
-                    where += str(self.json)[indexPosList-1:indexPosList+1]+"\t"
-                except IndexError:
-                    where += self.replaceStr+"\t"
-        return where
-
-
-    def dump_request(self):
-        return_string = b""
-        if self.method == "GET":
-            return_string = f"URL:{settings.url:b}"
-        if self.method == "POST":
-            return_string = f"URL:{settings.url:b}; data:{settings.data:b}"
-        if self.method == "JSON":
-            return_string = f"URL:{settings.url:b}; json:{settings.json:b}"
-        return return_string
-
-
-    def check_if_go(self):
-        if self.data and self.json:
-            print(f"Error, you've provided json & data ? that's dumb")
-            parser.print_help()
-            exit(42)
-        if (self.method == "GET" and (not self.replaceStr in self.url and not self.replaceStr in str(self.header))):
-            print(f"Error: Missing {self.replaceStr} in URL/Header provided")
-            exit(42)
-        if (self.method == "POST" and (not self.replaceStr in self.url and not self.replaceStr in str(self.header) and not self.replaceStr in self.data)):
-            print(f"Error: Missing {self.replaceStr} in URL/Data/Header provided")
-            exit(42)
-        if (self.method == "JSON" and (not self.replaceStr in self.url and not self.replaceStr in str(self.header) and not self.replaceStr in self.json)):
-            print(f"Error: Missing {self.replaceStr} in URL/Json/Header provided")
-            exit(42)
-
 
     def __str__(self):
         if "any,any" in self.lengthFilter:
-            length_message = "Selecting length matching: any"
+            length_message = "\033[1;36mSelecting length matching\033[0m: any"
         elif len(self.lengthFilter) == 2:
-            length_message = f"Selecting responses len following: {self.lengthFilter[0]} <= len <= {self.lengthFilter[1]}"
+            length_message = f"\033[1;36mSelecting responses len following\033[0m: {self.lengthFilter[0]} <= len \033[0m<= {self.lengthFilter[1]}"
         else:
-            length_message = f"Selecting responses len is in: {self.lengthFilter}"
+            length_message = f"\033[1;36mSelecting responses len is in\033[0m: {self.lengthFilter}"
 
         if "any,any" in self.timeFilter:
-            time_message = "Selecting response time matching: any"
+            time_message = "\033[1;36mSelecting response time matching\033[0m: any"
         elif len(self.timeFilter) == 2:
-            time_message = f"Selecting responses time following: {self.timeFilter[0]} <= time <= {self.timeFilter[1]}"
+            time_message = f"\033[1;36mSelecting responses time following\033[0m: {self.timeFilter[0]} <= time \033[0m<= {self.timeFilter[1]}"
         else:
-            time_message = f"Selecting responses time is in: {self.timeFilter}"
+            time_message = f"\033[1;36mSelecting responses time is in\033[0m: {self.timeFilter}"
 
 
-        # massive printing but it's beautiful once rendered, I swear
-        print_cursor("Current global settings:", y="c", x=0, color="b")
-        print_cursor("Url: ", y="c", x=4, color="g");                  print_cursor(f"{self.url}", color="lb")
-        print_cursor("Payloads file: ", y="c", x=4, color="g");        print_cursor(f"{self.payloadFile}", color="lb")
-        print_cursor("Base payload: ", y="c", x=4, color="g");         print_cursor(f"{self.basePayload}", color="lb")
-        print_cursor("Redirections allowed: ", y="c", x=4, color="g"); print_cursor(f"{self.redir}", color="lb")
-        print_cursor("Timeout of requests: ", y="c", x=4, color="g");  print_cursor(f"{self.timeout}", color="lb")
-        print_cursor("Threads: ", y="c", x=4, color="g");              print_cursor(f"{self.threads}", color="lb")
-        print_cursor("Force Encoding: ", y="c", x=4, color="g");       print_cursor(f'{"True" if self.forceEncode else "False"}', color="lb")
-        print_cursor("Dumping HTML pages: ", y="c", x=4, color="g");   print_cursor(f'{"True, outfile:"+self.out if self.out else "False"}', color="lb")
+        return f"""
+\033[92mCurrent global settings\033[0m:
+        \033[1;36mUrl\033[0m: {self.url}
+        \033[1;36mPayloads file\033[0m: {self.payloadFile}
+        \033[1;36mBase payload\033[0m: {self.basePayload}
+        \033[1;36mRedirections allowed\033[0m: {self.redir}
+        \033[1;36mTimeout of requests\033[0m: {self.timeout}
+        \033[1;36mThreads\033[0m: {self.threads}
+        \033[1;36mForce Encoding\033[0m: {"True" if self.forceEncode else "False"}
+        \033[1;36mDumping HTML pages\033[0m: {"True, outfile:"+self.out if self.out else "False"}
 
-        print_cursor("Current Trigger settings:", y="c", x=0, color="b")
-        print_cursor("Selecting HTTP status code: ", y="c",x=4, color="g"); print_cursor(f"{self.httpcodesFilter}", color="lb")
-        print_cursor(f"{length_message}", y="c",x=4, color="g")
-        print_cursor(f"{time_message}", y="c",x=4, color="g")
-        print_cursor("Excluding length mathing: ", y="c",x=4, color="g");   print_cursor(f"{self.excludeLength}", color="lb")
-        print_cursor("Trigger time difference: ", y="c",x=4, color="g");    print_cursor(f"{self.difftimer}", color="lb")
-        print_cursor("Match page techniques: ", y="c",x=4, color="g");      print_cursor(f'{"Quick ratio" if self.quick_ratio else "Strict ratio"}', color="lb")
-        print_cursor("Match page difference: ", y="c",x=4, color="g");      print_cursor(f"difference <= {self.difference}", color="lb")
-
-
-    def init_curses(self):
-        self.stdscr = curses.initscr()
-        self.cursor = 0
-        curses.noecho()
-        self.stdscr.scrollok(True)
-        curses.start_color()
-        # define colors
-        # fail
-        curses.init_color(1, 240*4,  85*4,   85*4)
-        # Green
-        curses.init_color(2, 85*4,   250*4,   85*4)
-        # light blue
-        curses.init_color(3, 0,   215*4,   250*4)
-        # warning
-        curses.init_color(4, 250*4,   250*4,   170*4)
-        # dark blue
-        curses.init_color(5, 0, 85*4, 250*4)
-
-        # init pairs
-        # fail
-        curses.init_pair(1, 1, curses.COLOR_BLACK)
-        # Green
-        curses.init_pair(2, 2, curses.COLOR_BLACK)
-        # Light Blue
-        curses.init_pair(3, 3, curses.COLOR_BLACK)
-        # warning
-        curses.init_pair(4, 4, curses.COLOR_BLACK)
-        # dark blue
-        curses.init_pair(5, 5, curses.COLOR_BLACK)
-        # normal
-        curses.init_pair(6, curses.COLOR_WHITE, curses.COLOR_BLACK)
+\033[92mCurrent Trigger settings\033[0m:
+        \033[1;36mSelecting HTTP status code\033[0m: {self.httpcodesFilter}
+        {length_message}
+        {time_message}
+        \033[1;36mExcluding length mathing\033[0m: {self.excludeLength}
+        \033[1;36mTrigger time difference\033[0m: {self.difftimer}
+        \033[1;36mMatch page techniques\033[0m: {"Quick ratio" if self.quick_ratio else "Strict ratio"}
+        \033[1;36mMatch page difference\033[0m: difference <= {self.difference}"""
 
 
 def get_base_request(url, redir, payload):
-    h = settings.header
-    if settings.replaceStr in str(settings.header):
-        h = json.loads(replace_string(str(h), payload).replace("'",'"'))
     try:
-        req = get(url.replace(settings.replaceStr, payload), allow_redirects=settings.redir, verify=settings.verify, headers=h, timeout=settings.timeout)
+        req = get(url.replace(settings.replaceStr, payload), allow_redirects=settings.redir, verify=settings.verify)
     except Exception as e:
         print(f"An error occured while requesting base request, Stopping here. Error: {e}")
-        end_clean()
-
-    print_cursor(f"Base request info:", y="c", x=0, color="b")
-    color, status = color_status(req.status_code)
-    print_cursor(f"status: ", y="c", x=4, color="g"); print_cursor(f"{status},",color=color)
-    print_cursor(f"content-length: ", y="c", x=4, color="g"); print_cursor(f"{len(req.text)-(len(payload)) if payload in req.text else len(req.text)},",color="n")
-    print_cursor(f"request time: ", y="c", x=4, color="g"); print_cursor(f"{round(req.elapsed.total_seconds()*1000, 3)}\n", color="n")
+        exit(42)
+    print(f"""
+\033[92mBase request info\033[0m:
+        \033[1;36mstatus\033[0m: {color_status(req.status_code)}\033[0m,
+        \033[1;36mcontent-length\033[0m: {len(req.text)-len(payload)},
+        \033[1;36mrequest time\033[0m: {round(req.elapsed.total_seconds()*1000, 3)}\n""")
     return req
 
 
@@ -251,7 +129,7 @@ def parse_filter(arg):
 
 def parse_length_time_filter(args):
     splitted = args.split(",")
-    if len(splitted) >2 :
+    if len(splitted)>2:
         length_table = set()
         for code in splitted:
             length_table.add(int(code,10))
@@ -273,8 +151,8 @@ def parse_excluded_length(arg):
         try:
             splitted = int("".join(splitted))
         except Exception as e:
-            print_cursor(f"Error in excluded length argument, make sure it's like: 2566 or 2566,5550, Error: {e}", y="c", x=0, color="f")
-            end_clean()
+            print(f"Error in excluded length argument, make sure it's like: 2566 or 2566,5550, Error: {e}")
+            exit(42)
 
         return [splitted]
 
@@ -321,144 +199,21 @@ def time_matching(response_len_time):
 
 def color_status(status):
     status = str(status)
-    color = "n"
     if status[0] == str(5):
-        color = "f"
+        status = f"\033[91m{status}"
     elif status[0] == str(4) and status[2] != str(3):
-        color = "w"
+        status = f"\033[93m{status}"
     elif status == "403":
-        color = "b"
+        status = f"\033[94m{status}"
     elif status[0] == str(3):
-        color = "lb"
-    return color, status
+        status = f"\033[1;36m{status}"
+    else:
+        status = f"\033[92m{status}"
+    return status
 
 
 def get_(url, parameter):
-    h = settings.header
-    if settings.replaceStr in settings.header:
-        h = json.loads(replace_string(str(h), parameter).replace("'",'"'))
-    try:
-        req = get(url, timeout=settings.timeout, allow_redirects=settings.redir, verify=settings.verify, headers=h)
-    except Exception as e:
-        print_cursor(f"Error with arg {parameter}: {e}", y="c", x=0, color="f")
-        req = None
-    return (req, parameter)
-
-
-def post_(url, data, parameter):
-    h = settings.header
-    if settings.replaceStr in settings.header:
-        h = json.loads(replace_string(str(h), parameter).replace("'",'"'))
-    try:
-        req = post(url, timeout=settings.timeout, allow_redirects=settings.redir, verify=settings.verify, headers=h, data=data)
-    except Exception as e:
-        print_cursor(f"Error with arg {parameter}: {e}", y="c", x=0, color="f")
-        req = None
-    return (req, parameter)
-
-
-def json_(url, json, parameter):
-    h = settings.header
-    if settings.replaceStr in settings.header:
-        h = json.loads(replace_string(str(h), parameter).replace("'",'"'))
-    try:
-        req = post(url, timeout=settings.timeout, allow_redirects=settings.redir, verify=settings.verify, headers=h, json=json)
-    except Exception as e:
-        print_cursor(f"Error with arg {parameter}: {e}", y="c", x=0, color="f")
-        req = None
-    return (req, parameter)
-
-
-def replace_string(data, repl):
-    return data.replace(settings.replaceStr, quote(repl) if settings.forceEncode else repl)
-
-
-def print_nothing(time_print,current_status, payload_len, r, parameter, end="\r"):
-    pay = replace_string(settings.print_str, parameter)
-    # clean the line but not everything
-    print_cursor(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t \t \t \t\t "[:settings.termlength-50], y="c",x=0)
-    # print over the cleaned line
-    print_cursor(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{r.status_code}\t{len(r.content)}\t{int(r.elapsed.total_seconds()*1000)}\t\t{pay}"[:settings.termlength-50], y="c",x=0, pad=(-1))
-    # print url
-    print_cursor(r.url, y="c",x=0,)
-    # go back 2 lines above to rewrite the lines
-    settings.cursor -= 2
-
-def print_cursor(what, y=None, x=None, color="n", pad=0):
-    # choosing the color pair with the letter given in parameter
-    # I wanted to keep letters to choose the colors -> easy to remember
-    # Neutral
-    if color.lower() == "n":
-        color = curses.color_pair(6)
-    # Fail
-    elif color.lower() == "f":
-        color = curses.color_pair(1)
-    # Green
-    elif color.lower() == "g":
-        color = curses.color_pair(2)
-    # Blue (dark)
-    elif color.lower() == "b":
-        color = curses.color_pair(5)
-    # Warning
-    elif color.lower() == "w":
-        color = curses.color_pair(4)
-    # Light blue
-    elif color.lower() == "lb":
-        color = curses.color_pair(3)
-    # take off the moufles
-    else:
-        exit("Unrecognized color")
-
-    # "c" == current cursor in my mind
-    if y == "c" :
-        y = settings.cursor + 1 + pad
-        settings.cursor = y
-        x = x if x != None else 0
-    else:
-        t_y, t_x = settings.stdscr.getyx()
-        x = t_x if x == None else x
-        y = t_y if y == None else y
-
-    # end of line -> go back at 0
-    if x > settings.termlength - 1:
-        x = 0
-        y += 1
-    # don't print on the last 3 lines
-    if y >= settings.termlength_y - 3:
-        settings.stdscr.scroll()
-        t_y, t_x = settings.stdscr.getyx()
-        y = t_y
-        settings.cursor = y
-
-    try:
-        settings.stdscr.addstr(y, x, what, color)
-        settings.stdscr.refresh()
-    except curses.error:
-        print("error")
-
-
-def print_header():
-    temp = "Time\tPayload_index\tStatus\tLength\tResponse_time\t"
-    if settings.replaceStr in settings.url:
-        temp += "Url\t"
-    if settings.header != {} :
-        if settings.replaceStr in str(settings.header):
-            temp += "Header\t"
-    if settings.data != None:
-        if settings.replaceStr in settings.data:
-            temp += "Data\t"
-    if settings.json != None:
-        if settings.replaceStr in settings.json:
-            temp += "Json\t"
-
-    print_cursor(temp, y="c", color="n")
-    print_cursor("-"*150, y="c", color="n")
-
-
-def end_clean():
-    os.system("stty sane")
-    print("\n")
-    exit(42)
+    return (get(url, timeout=settings.timeout, allow_redirects=settings.redir, verify=settings.verify), parameter)
 
 
 def status_matching(status):
