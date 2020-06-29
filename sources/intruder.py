@@ -97,7 +97,7 @@ def main():
                         time_print = str(date_diff).split(".")[0]
                         if not (is_identical(r, base_request, p, settings.basePayload) ^ settings.matchBase):
                             status = r.status_code
-                            response_len = len(r.text)-(len(p))
+                            response_len = len(r.text)-(len(p)) if p in r.text else len(r.text)
                             response_time = int(r.elapsed.total_seconds()*1000)
                             # Determine if the http status code is good to be printed
                             go_status = status_matching(status)
