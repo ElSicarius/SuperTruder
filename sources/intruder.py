@@ -87,7 +87,7 @@ def main():
                     r, p = futu.result()
                     current_status = payload.index(p)
                 except Exception as e:
-                    #print(f"{red}An Unhandled error occured in thread: {e}{end}")
+                    print(f"{red}An Unhandled error occured in thread: {e}{end}")
                     pass
                 else:
                     if r != None:

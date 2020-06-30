@@ -160,6 +160,7 @@ def is_identical(req1, req2, parameter, basePayload):
         difference_of_text = difflib.SequenceMatcher(None, req1.text, req2.text).quick_ratio()
     else:
         difference_of_text = difflib.SequenceMatcher(None, req1.text, req2.text).ratio()
+        
     diff_timer_requests =  abs(round(req1.elapsed.total_seconds()*1000, 3) - round(req2.elapsed.total_seconds()*1000, 3))
 
     if diff_timer_requests >= settings.difftimer:
