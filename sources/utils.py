@@ -28,10 +28,8 @@ def set_global(settings):
 class Settings:
     def __init__(self,args):
         if not args.url or not args.payload:
-            print(f"{red}Error, not enough args{end}")
-            parser.print_help()
+            print(f"{red}Error, not enough args, see help for more details{end}")
             exit(42)
-
 
         self.basePayload = args.basePayload
         self.url = args.url
@@ -44,6 +42,8 @@ class Settings:
         self.lengthFilter = parse_length_time_filter(args.lengthFilter)
         self.matchBase = args.matchBaseRequest
         self.out = args.dumpHtml
+        if self.out:
+            self.fileStream = open(self.out, "ab+")
         self.payloadFile = args.payload
         self.payload_offset = int(args.offset)
         self.quick_ratio = args.quickRatio
@@ -56,6 +56,8 @@ class Settings:
         self.uselessprint = not args.uselessprint
         self.verify = args.verify
         self.headers = args.headers if args.headers == {} else self.loadHeaders(args.headers)
+        self.forceTest = args.ignoreBaseRequest
+        self.base_request = {"req": None, "text": "", "time": 0, "status": 0}
 
         self.method = "GET"
         self.data = None
@@ -105,7 +107,7 @@ class Settings:
         {light_blue}HTTP Method: {end}{self.method}
         {light_blue}Additionnal data:
             {light_blue}Headers: {end}{self.headers}
-            {light_blue}Data: {end}{self.data if len(self.data)<=20 else self.data[:10]+f"{yellow}[...]{end}"+self.data[-10:]}
+            {light_blue}Data: {end}{self.data if self.data == None or len(self.data)<=20 else self.data[:10]+f"{yellow}[...]{end}"+self.data[-10:]}
         {light_blue}Payloads file: {end}{self.payloadFile}
         {light_blue}Base payload: {end}{self.basePayload}
         {light_blue}Redirections allowed: {end}{self.redir}
@@ -123,53 +125,65 @@ class Settings:
         {light_blue}Match page techniques: {end}{"Quick ratio" if self.quick_ratio else "Strict ratio"}
         {light_blue}Match page difference: {end}difference <= {self.difference}{end}"""
 
-
 def get_base_request():
+    req = None
     if settings.method == "GET":
         try:
             req, payload = get_(replace_string(settings.url, settings.replaceStr, settings.basePayload), settings.basePayload)
         except Exception as e:
-            print(f"{red}An error occured while requesting base request, Stopping here. Error: {e}{end}")
-            exit(42)
+            print(f"{red}An error occured while requesting base request. Error: {e}{end}")
     elif settings.method == "POST":
         try:
             req, payload = post_(replace_string(settings.url, settings.replaceStr, settings.basePayload),replace_string(settings.data, settings.replaceStr, settings.basePayload) , settings.basePayload)
         except Exception as e:
-            print(f"{red}An error occured while requesting base request, Stopping here. Error: {e}{end}")
-            exit(42)
-    print(f"""
+            print(f"{red}An error occured while requesting base request. Error: {e}{end}")
+
+        print(f"{yellow}Forcing test (might be a total failure){end}")
+    if req == None and not settings.forceTest:
+        print(f"{red}Stopping here...{end}")
+        exit(42)
+    elif req != None:
+        settings.base_request = {"req": req, "text": req.text, "time": int(req.elapsed.total_seconds()*1000), "status": req.status_code}
+        print(f"""
 {green}Base request info:
         {light_blue}status: {color_status(req.status_code)}{end},
         {light_blue}content-length: {end}{len(req.text)-len(payload) if payload in req.text else len(req.text)},
         {light_blue}request time: {end}{round(req.elapsed.total_seconds()*1000, 3)}{end},
         {light_blue}Request text (trucated) was: {end}{req.text if len(req.text)<=100 else req.text[:50]+f" {yellow}[...]{end} "+req.text[-50:]}\n""")
-    return req
+
+    elif req == None:
+        settings.base_request = {"req": None, "text": None, "time": 0, "status": 0}
 
 
-def is_identical(req1, req2, parameter, basePayload):
+
+def is_identical(req, parameter):
     ## Here we'll assume that two pages with text matching each other by > 98% are identical
     ## The purpose of this comparison is to assume that pages can contain variables like time
     ## , IP or the parameter itself.
     ## Low cost check
-    if req1.text.replace(parameter, "") == req2.text.replace(basePayload, ""):
+    if settings.base_request["req"] == None:
+        return False
+
+    if settings.base_request["text"].replace(settings.basePayload, "") == req.text.replace(parameter, ""):
         return True
     ## Well use "Real_quick_ratio" instead of "quick_ratio"
     ## This is needed because a page with a small length could be hard to match at +98% with an other page
     ## Eg: page1 = "abcd" page2 = "abce"; difference = 1 caracter but match is 75% !
     if settings.quick_ratio:
-        difference_of_text = difflib.SequenceMatcher(None, req1.text, req2.text).quick_ratio()
+        difference_of_text = difflib.SequenceMatcher(None, settings.base_request["text"], req.text).quick_ratio()
     else:
-        difference_of_text = difflib.SequenceMatcher(None, req1.text, req2.text).ratio()
-        
-    diff_timer_requests =  abs(round(req1.elapsed.total_seconds()*1000, 3) - round(req2.elapsed.total_seconds()*1000, 3))
+        difference_of_text = difflib.SequenceMatcher(None, settings.base_request["text"], req.text).ratio()
+
+    diff_timer_requests =  abs(settings.base_request["time"] - int(req.elapsed.total_seconds()*1000))
 
     if diff_timer_requests >= settings.difftimer:
         return False
     #print(f"Text Similiratity: {(difference_of_text*100)}%")
     #print(f"Difference with len of page1 {len(req1.content)}, page2 {len(req2.content)}")
 
-    if req1.status_code == req2.status_code and difference_of_text > settings.difference:
+    if settings.base_request["status"] == req.status_code and difference_of_text > settings.difference:
         return True
+
     return False
 
 
@@ -278,7 +292,7 @@ def color_status(status):
     elif status[0] == str(3):
         status = f"{light_blue}{status}"
     else:
-        status = f"{end}{status}"
+        status = f"{green}{status}"
     return status
 
 
