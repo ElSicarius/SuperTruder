@@ -76,7 +76,7 @@ class Settings:
         headers = headers_string.split(",")
         header_final = {}
         for h in headers:
-            splitted = h.replace("\\","").split(": ")
+            splitted = h.replace("\\!","!").split(": ")
             if len(splitted) != 2:
                 print(f"{red} You have an error on the header syntax, exitting{end}")
                 exit(42)
