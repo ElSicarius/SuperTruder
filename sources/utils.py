@@ -102,6 +102,7 @@ class Settings:
         return f"""
 {green}Current global settings:
         {light_blue}Url: {end}{self.url}
+        {light_blue}HTTP Method: {self.method}
         {light_blue}Additionnal data:
             {light_blue}Headers: {end}{self.headers}
             {light_blue}Data: {end}{self.data if len(self.data)<=20 else self.data[:10]+f"{yellow}[...]{end}"+self.data[-10:]}
