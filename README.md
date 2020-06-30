@@ -72,9 +72,6 @@ Not happy with \r printing ? use `--uselessprint` flag.
 
 # Todo
 
-- Add headers to request
-
-- Work on a post fuzzing feature
 - Work on a headers fuzzing feature
 
 # Ideas
