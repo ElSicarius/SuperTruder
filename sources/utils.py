@@ -56,6 +56,8 @@ class Settings:
         self.uselessprint = not args.uselessprint
         self.verify = args.verify
         self.headers = args.headers if args.headers == {} else self.loadHeaders(args.headers)
+        self.forceTest = args.forceTest
+        self.base_request = None
 
         self.method = "GET"
         self.data = None
@@ -123,7 +125,27 @@ class Settings:
         {light_blue}Match page techniques: {end}{"Quick ratio" if self.quick_ratio else "Strict ratio"}
         {light_blue}Match page difference: {end}difference <= {self.difference}{end}"""
 
-
+def get_base_request_(self, url, redir, payload):
+    req = None
+    base_request_obj = {"obj": req, "text": "", "time": 0, "status": 0}
+    try:
+        req = get(url.replace(settings.replaceStr, payload), allow_redirects=settings.redir, verify=settings.verify)
+    except Exception as e:
+        print(f"An error occured while requesting base request, Error: {e}")
+        if not settings.forceTest:
+            exit(42)
+        print("Forcing test (might be a total failure)")
+    else:
+        print(f"""
+    \033[92mBase request info\033[0m:
+            \033[1;36mstatus\033[0m: {color_status(req.status_code)}\033[0m,
+            \033[1;36mcontent-length\033[0m: {len(req.text)-len(payload) if payload in req.text else len(req.text)},
+            \033[1;36mrequest time\033[0m: {round(req.elapsed.total_seconds()*1000, 3)}\n""")
+    if req == None:
+        base_request_obj = {"obj": None, "text": None, "time": 0, "status": 0}
+    else:
+        base_request_obj = {"obj": req, "text": req.text, "time": 0, "status": 0}
+return req
 def get_base_request():
     if settings.method == "GET":
         try:
@@ -160,7 +182,7 @@ def is_identical(req1, req2, parameter, basePayload):
         difference_of_text = difflib.SequenceMatcher(None, req1.text, req2.text).quick_ratio()
     else:
         difference_of_text = difflib.SequenceMatcher(None, req1.text, req2.text).ratio()
-        
+
     diff_timer_requests =  abs(round(req1.elapsed.total_seconds()*1000, 3) - round(req2.elapsed.total_seconds()*1000, 3))
 
     if diff_timer_requests >= settings.difftimer:

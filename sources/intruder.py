@@ -37,6 +37,7 @@ def main():
     parser.add_argument("--timeout", default=20)
     parser.add_argument("--uselessprint", help="Enable Louka-friendly program", default=False, action="store_true")
     parser.add_argument("--verify", default=False, action="store_true")
+    parser.add_argument("--forceTest", default=False, action="store_true", help="Force testing even if base request failed")
     args = parser.parse_args()
 
 
