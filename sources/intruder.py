@@ -37,7 +37,7 @@ def main():
     parser.add_argument("--timeout", default=20)
     parser.add_argument("--uselessprint", help="Enable Louka-friendly program", default=False, action="store_true")
     parser.add_argument("--verify", default=False, action="store_true")
-    parser.add_argument("--forceTest", default=False, action="store_true", help="Force testing even if base request failed")
+    parser.add_argument("--ignoreBaseRequest", default=False, action="store_true", help="Force testing even if base request failed")
     args = parser.parse_args()
 
 
@@ -94,7 +94,7 @@ def main():
                     if r != None:
                         date_diff = datetime.now()-now
                         time_print = str(date_diff).split(".")[0]
-                        if not (is_identical(r, base_request, p, settings.basePayload) ^ settings.matchBase):
+                        if not (is_identical(r, p) ^ settings.matchBase):
                             status = r.status_code
                             response_len = len(r.text)-(len(p)) if p in r.text else len(r.text)
                             response_time = int(r.elapsed.total_seconds()*1000)
