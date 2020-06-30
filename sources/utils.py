@@ -42,6 +42,8 @@ class Settings:
         self.lengthFilter = parse_length_time_filter(args.lengthFilter)
         self.matchBase = args.matchBaseRequest
         self.out = args.dumpHtml
+        if self.out:
+            self.fileStream = open(self.out, "ab+")
         self.payloadFile = args.payload
         self.payload_offset = int(args.offset)
         self.quick_ratio = args.quickRatio

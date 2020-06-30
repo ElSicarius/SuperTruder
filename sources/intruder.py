@@ -106,17 +106,16 @@ def main():
                             go_time = time_matching(response_time)
                             # print status message only if httpcode & len are ok
                             if go_status and go_length and go_time:
-                                status = str(status)
                                 status = color_status(status)
                                 length = str(response_len)
                                 timer = str(response_time)
-                                url = unquote(r.url)
+                                url = r.url if not settings.forceEncode else unquote(r.url)
                                 print(f"{' '*(settings.termlength)}", end="\r")
                                 print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{status}\t{length}\t{timer}\t\t{p}{end}")
                                 if settings.out and len(r.content) != 0:
                                     try:
-                                        with open(f"{settings.out}", 'ab+') as f:
-                                            f.write(r.content)
+                                        settings.fileStream.write(bytes(f"###########################  {r.url}  #######################", "utf-8"))
+                                        settings.fileStream.write(r.content)
                                     except Exception as e:
                                         print(f"{red}Error: could not write file {settings.out} Error: {e}{end}")
                             else:
