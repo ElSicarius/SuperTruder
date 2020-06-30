@@ -8,12 +8,31 @@ import difflib
 import re
 
 
+### some colors, needs to be global
+dark_blue = "\033[94m"
+bold = "\033[1m"
+green = "\033[92m"
+light_blue = "\033[1;36m"
+red = "\033[91m"
+yellow = "\033[93m"
+end = "\033[0m"
+
+
+
+
+
 def set_global(settings):
     globals()["settings"] = settings
 
 
 class Settings:
     def __init__(self,args):
+        if not args.url or not args.payload:
+            print(f"{red}Error, not enough args{end}")
+            parser.print_help()
+            exit(42)
+
+
         self.basePayload = args.basePayload
         self.url = args.url
         self.clean_url = "".join(re.findall("https?:\/\/[a-z\dA-Z.-]+", self.url))
@@ -36,54 +55,85 @@ class Settings:
         self.timeout = int(args.timeout)
         self.uselessprint = not args.uselessprint
         self.verify = args.verify
+        self.headers = args.headers if args.headers == {} else self.loadHeaders(args.headers)
+
+        self.method = "GET"
+        self.data = None
+
+        if args.data:
+            self.method = "POST"
+            self.data = args.data
+
+        if self.replaceStr not in self.url:
+            if self.method == "GET":
+                print(f"{red}Error: Missing {self.replaceStr} in URL provided{end}")
+                exit(42)
+            if self.method == "POST" and self.replaceStr not in self.data:
+                print(f"{red}Error: Missing {self.replaceStr} in URL/Data provided{end}")
+                exit(42)
+
+    def loadHeaders(self, headers_string):
+        headers = headers_string.split(",")
+        header_final = {}
+        for h in headers:
+            splitted = h.replace("\\","").split(": ")
+            if len(splitted) != 2:
+                print(f"{red} You have an error on the header syntax, exitting{end}")
+                exit(42)
+            header_final.update({splitted[0]: splitted[1]})
+        return header_final
+
     def __str__(self):
         if "any,any" in self.lengthFilter:
-            length_message = "\033[1;36mSelecting length matching\033[0m: any"
+            length_message = f"Selecting length matching: {end}any"
         elif len(self.lengthFilter) == 2:
-            length_message = f"\033[1;36mSelecting responses len following\033[0m: {self.lengthFilter[0]} <= len \033[0m<= {self.lengthFilter[1]}"
+            length_message = f"Selecting responses len following: {end}{self.lengthFilter[0]} {yellow}<= len <={end} {self.lengthFilter[1]}"
         else:
-            length_message = f"\033[1;36mSelecting responses len is in\033[0m: {self.lengthFilter}"
+            length_message = f"Selecting responses len is in: {end}{self.lengthFilter}"
 
         if "any,any" in self.timeFilter:
-            time_message = "\033[1;36mSelecting response time matching\033[0m: any"
+            time_message = f"Selecting response time matching: {end}any"
         elif len(self.timeFilter) == 2:
-            time_message = f"\033[1;36mSelecting responses time following\033[0m: {self.timeFilter[0]} <= time \033[0m<= {self.timeFilter[1]}"
+            time_message = f"Selecting responses time following: {end}{self.timeFilter[0]} {yellow}<= time <={end} {self.timeFilter[1]}"
         else:
-            time_message = f"\033[1;36mSelecting responses time is in\033[0m: {self.timeFilter}"
+            time_message = f"Selecting responses time is in: {end}{self.timeFilter}"
 
 
         return f"""
-\033[92mCurrent global settings\033[0m:
-        \033[1;36mUrl\033[0m: {self.url}
-        \033[1;36mPayloads file\033[0m: {self.payloadFile}
-        \033[1;36mBase payload\033[0m: {self.basePayload}
-        \033[1;36mRedirections allowed\033[0m: {self.redir}
-        \033[1;36mTimeout of requests\033[0m: {self.timeout}
-        \033[1;36mThreads\033[0m: {self.threads}
-        \033[1;36mForce Encoding\033[0m: {"True" if self.forceEncode else "False"}
-        \033[1;36mDumping HTML pages\033[0m: {"True, outfile:"+self.out if self.out else "False"}
+{green}Current global settings:
+        {light_blue}Url: {end}{self.url}
+        {light_blue}Additionnal data:
+            {light_blue}Headers: {end}{self.headers}
+            {light_blue}Data: {end}{self.data if len(self.data)<=20 else self.data[:10]+f"{yellow}[...]{end}"+self.data[-10:]}
+        {light_blue}Payloads file: {end}{self.payloadFile}
+        {light_blue}Base payload: {end}{self.basePayload}
+        {light_blue}Redirections allowed: {end}{self.redir}
+        {light_blue}Timeout of requests: {end}{self.timeout}
+        {light_blue}Threads: {end}{self.threads}
+        {light_blue}Force Encoding: {end}{"True" if self.forceEncode else "False"}
+        {light_blue}Dumping HTML pages: {end}{"True, outfile:"+self.out if self.out else "False"}
 
-\033[92mCurrent Trigger settings\033[0m:
-        \033[1;36mSelecting HTTP status code\033[0m: {self.httpcodesFilter}
-        {length_message}
-        {time_message}
-        \033[1;36mExcluding length mathing\033[0m: {self.excludeLength}
-        \033[1;36mTrigger time difference\033[0m: {self.difftimer}
-        \033[1;36mMatch page techniques\033[0m: {"Quick ratio" if self.quick_ratio else "Strict ratio"}
-        \033[1;36mMatch page difference\033[0m: difference <= {self.difference}"""
+{green}Current Trigger settings:
+        {light_blue}Selecting HTTP status code: {end}{self.httpcodesFilter}
+        {light_blue}{length_message}
+        {light_blue}{time_message}
+        {light_blue}Excluding length mathing: {end}{self.excludeLength}
+        {light_blue}Trigger time difference: {end}{self.difftimer}
+        {light_blue}Match page techniques: {end}{"Quick ratio" if self.quick_ratio else "Strict ratio"}
+        {light_blue}Match page difference: {end}difference <= {self.difference}{end}"""
 
 
 def get_base_request(url, redir, payload):
     try:
         req = get(url.replace(settings.replaceStr, payload), allow_redirects=settings.redir, verify=settings.verify)
     except Exception as e:
-        print(f"An error occured while requesting base request, Stopping here. Error: {e}")
+        print(f"{red}An error occured while requesting base request, Stopping here. Error: {e}{end}")
         exit(42)
     print(f"""
-\033[92mBase request info\033[0m:
-        \033[1;36mstatus\033[0m: {color_status(req.status_code)}\033[0m,
-        \033[1;36mcontent-length\033[0m: {len(req.text)-len(payload) if payload in req.text else len(req.text)},
-        \033[1;36mrequest time\033[0m: {round(req.elapsed.total_seconds()*1000, 3)}\n""")
+{green}Base request info:
+        {light_blue}status: {color_status(req.status_code)}{end},
+        {light_blue}content-length: {end}{len(req.text)-len(payload) if payload in req.text else len(req.text)},
+        {light_blue}request time: {end}{round(req.elapsed.total_seconds()*1000, 3)}{end}\n""")
     return req
 
 
@@ -151,7 +201,7 @@ def parse_excluded_length(arg):
         try:
             splitted = int("".join(splitted))
         except Exception as e:
-            print(f"Error in excluded length argument, make sure it's like: 2566 or 2566,5550, Error: {e}")
+            print(f"{red}Error in excluded length argument, make sure it's like: 2566 or 2566,5550, Error: {e}{end}")
             exit(42)
 
         return [splitted]
@@ -210,20 +260,27 @@ def time_matching(response_len_time):
 def color_status(status):
     status = str(status)
     if status[0] == str(5):
-        status = f"\033[91m{status}"
+        status = f"{red}{status}"
     elif status[0] == str(4) and status[2] != str(3):
-        status = f"\033[93m{status}"
+        status = f"{yellow}{status}"
     elif status == "403":
-        status = f"\033[94m{status}"
+        status = f"{dark_blue}{status}"
     elif status[0] == str(3):
-        status = f"\033[1;36m{status}"
+        status = f"{light_blue}{status}"
     else:
-        status = f"\033[92m{status}"
+        status = f"{end}{status}"
     return status
 
 
+def replace_string(data, focus, new_data):
+    return data.replace(focus, quote(new_data) if settings.forceEncode else new_data)
+
+
 def get_(url, parameter):
-    return (get(url, timeout=settings.timeout, allow_redirects=settings.redir, verify=settings.verify), parameter)
+    return (get(url, timeout=settings.timeout, allow_redirects=settings.redir, verify=settings.verify, headers=settings.headers), parameter)
+
+def post_(url, data, parameter):
+    return (post(url, data=data,timeout=settings.timeout, allow_redirects=settings.redir, verify=settings.verify, headers=settings.headers), parameter)
 
 
 def status_matching(status):
