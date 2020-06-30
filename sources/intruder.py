@@ -46,7 +46,7 @@ def main():
     print(settings)
     del args
 
-    base_request = get_base_request(settings.url, settings.redir, settings.basePayload)
+    base_request = get_base_request()
     try:
         with open(settings.payloadFile, "r") as f:
             payloaddata = f.read()

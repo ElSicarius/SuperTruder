@@ -102,7 +102,7 @@ class Settings:
         return f"""
 {green}Current global settings:
         {light_blue}Url: {end}{self.url}
-        {light_blue}HTTP Method: {self.method}
+        {light_blue}HTTP Method: {end}{self.method}
         {light_blue}Additionnal data:
             {light_blue}Headers: {end}{self.headers}
             {light_blue}Data: {end}{self.data if len(self.data)<=20 else self.data[:10]+f"{yellow}[...]{end}"+self.data[-10:]}
@@ -124,17 +124,25 @@ class Settings:
         {light_blue}Match page difference: {end}difference <= {self.difference}{end}"""
 
 
-def get_base_request(url, redir, payload):
-    try:
-        req = get(url.replace(settings.replaceStr, payload), allow_redirects=settings.redir, verify=settings.verify)
-    except Exception as e:
-        print(f"{red}An error occured while requesting base request, Stopping here. Error: {e}{end}")
-        exit(42)
+def get_base_request():
+    if settings.method == "GET":
+        try:
+            req, payload = get_(replace_string(settings.url, settings.replaceStr, settings.basePayload), settings.basePayload)
+        except Exception as e:
+            print(f"{red}An error occured while requesting base request, Stopping here. Error: {e}{end}")
+            exit(42)
+    elif settings.method == "POST":
+        try:
+            req, payload = post_(replace_string(settings.url, settings.replaceStr, settings.basePayload),replace_string(settings.data, settings.replaceStr, settings.basePayload) , settings.basePayload)
+        except Exception as e:
+            print(f"{red}An error occured while requesting base request, Stopping here. Error: {e}{end}")
+            exit(42)
     print(f"""
 {green}Base request info:
         {light_blue}status: {color_status(req.status_code)}{end},
         {light_blue}content-length: {end}{len(req.text)-len(payload) if payload in req.text else len(req.text)},
-        {light_blue}request time: {end}{round(req.elapsed.total_seconds()*1000, 3)}{end}\n""")
+        {light_blue}request time: {end}{round(req.elapsed.total_seconds()*1000, 3)}{end},
+        {light_blue}Request text (trucated) was: {end}{req.text if len(req.text)<=100 else req.text[:50]+f" {yellow}[...]{end} "+req.text[-50:]}\n""")
     return req
 
 
