@@ -18,7 +18,7 @@ This program is pip-free ! no need to install any shitty pip package to work. Yo
 `python3 supertruder.py --threads 20 -p database/payloads.txt -u "http://example.com/specialparameter=§" -b "mySpecialParameter" --matchBaseRequest`
 
 - Fuzz something and match responses with content-length in range or matching values:
-`python3 supertruder.py --threads 20 -p database/payloads.txt -u "http://example.com/lengthchanging=§" -l 2000,2300 -nl 2250,2251`
+`python3 supertruder.py --threads 20 -p database/payloads.txt -u "http://example.com/lengthchanging=§" -l 2000,2300 -el 2250,2251`
 
 [...]
 
