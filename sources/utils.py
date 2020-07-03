@@ -2,10 +2,11 @@
 
 import os
 import sys
-from requests import get, post
+from requests import get, post, packages
 from urllib.parse import unquote, quote
 import difflib
 import re
+from time import sleep
 
 
 ### some colors, needs to be global
@@ -17,8 +18,8 @@ red = "\033[91m"
 yellow = "\033[93m"
 end = "\033[0m"
 
-
-
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 def set_global(settings):
@@ -38,6 +39,7 @@ class Settings:
         self.difftimer = args.difftimer
         self.excludeLength = parse_excluded_length(args.excludeLength)
         self.forceEncode = args.forceEncode
+        self.throttle = 0.1
         self.httpcodesFilter = parse_filter(args.filter)
         self.lengthFilter = parse_length_time_filter(args.lengthFilter)
         self.matchBase = args.matchBaseRequest
@@ -58,9 +60,10 @@ class Settings:
         self.headers = args.headers if args.headers == {} else self.loadHeaders(args.headers)
         self.forceTest = args.ignoreBaseRequest
         self.base_request = {"req": None, "text": "", "time": 0, "status": 0}
-
+        self.retry = True
         self.method = "GET"
         self.data = None
+        self.errors = 0
 
         if args.data:
             self.method = "POST"
@@ -301,11 +304,46 @@ def replace_string(data, focus, new_data):
 
 
 def get_(url, parameter):
-    return (get(url, timeout=settings.timeout, allow_redirects=settings.redir, verify=settings.verify, headers=settings.headers), parameter)
+    sleep(settings.throttle)
+    try:
+        req = get(url, timeout=settings.timeout, allow_redirects=settings.redir, verify=settings.verify, headers=settings.headers)
+        if req.status_code == 429:
+            print(f"Rate limit reached, increase --throttle! Current is {settings.throttle}")
+    except:
+        settings.errors += 1
+        if settings.retry:
+            try:
+                req = get(url, timeout=settings.timeout, allow_redirects=settings.redir, verify=settings.verify, headers=settings.headers)
+                if req.status_code == 429:
+                    print(f"Rate limit reached, increase --throttle! Current is {settings.throttle}")
+            except:
+                settings.errors += 1
+                req = None
+        else:
+            req = None
+
+    return (req, parameter)
 
 def post_(url, data, parameter):
-    return (post(url, data=data,timeout=settings.timeout, allow_redirects=settings.redir, verify=settings.verify, headers=settings.headers), parameter)
+    sleep(settings.throttle)
+    try:
+        req = post(url, data=data,timeout=settings.timeout, allow_redirects=settings.redir, verify=settings.verify, headers=settings.headers)
+        if req.status_code == 429:
+            print(f"Rate limit reached, increase --throttle! Current is {settings.throttle}")
+    except:
+        settings.errors += 1
+        if settings.retry:
+            try:
+                req = post(url, data=data,timeout=settings.timeout, allow_redirects=settings.redir, verify=settings.verify, headers=settings.headers)
+                if req.status_code == 429:
+                    print(f"Rate limit reached, increase --throttle! Current is {settings.throttle}")
+            except:
+                settings.errors += 1
+                req = None
+        else:
+            req = None
 
+    return (req, parameter)
 
 def status_matching(status):
     # return True if:

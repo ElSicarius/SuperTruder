@@ -124,7 +124,7 @@ def main():
                             print_nothing(time_print,current_status, payload_len, r, p)
 
                     else:
-                        print(f"{red}Request == None ??{end}")
+                        pass
     except KeyboardInterrupt:
         print(" "*settings.termlength, end="\r")
         print(f"{red}[KILLED] Process cancelled. Info: \n{red}time: {yellow}{time_print} \n{red}Payload index: {yellow}{format(current_status, f'0{len(str(payload_len))}')}/{payload_len} -> \"{payload[current_status]}\" \n{red}Current URL: {yellow}{r.url}{end}"[:settings.termlength-20])
@@ -139,6 +139,7 @@ def main():
         thread._threads_queues.clear()
 
     print(f"{dark_blue}[+] Done{end}" + " "* settings.termlength)
+    print(f"Errors encountered: {settings.errors}")
 
 if __name__ == '__main__':
     main()
