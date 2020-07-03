@@ -36,7 +36,7 @@ class Settings:
         self.url = args.url
         self.clean_url = "".join(re.findall("https?:\/\/[a-z\dA-Z.-]+", self.url))
         self.difference = float(args.textDifference)
-        self.difftimer = args.difftimer
+        self.difftimer = int(args.difftimer)
         self.excludeLength = parse_excluded_length(args.excludeLength)
         self.forceEncode = args.forceEncode
         self.throttle = 0.1
