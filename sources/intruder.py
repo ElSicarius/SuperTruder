@@ -27,7 +27,7 @@ def main():
     parser.add_argument('-p', "--payload",help='payload file',)
     parser.add_argument('-r', "--redir", dest="redir", default=False, action="store_true", help='Allow HTTP redirects')
     parser.add_argument('-u', "--url",help='Url to test',)
-    parser.add_argument("-H", "--headers", default={}, help="Add extra Headers (syntax: \"header: value,header2: value2\")")
+    parser.add_argument("-H", "--headers", default={}, help="Add extra Headers (syntax: \"header: value\\nheader2: value2\")")
     parser.add_argument("--difftimer", help="Change the default matching timer (default 2000ms -> 2 seconds)", default=2000)
     parser.add_argument("--forceEncode", help="Force URL encode", action="store_true")
     parser.add_argument("--offset", help="Start over where you stopped by giving the payload offset", default=0)

@@ -78,7 +78,7 @@ class Settings:
                 exit(42)
 
     def loadHeaders(self, headers_string):
-        headers = headers_string.split(",")
+        headers = headers_string.split("\\n")
         header_final = {}
         for h in headers:
             splitted = h.replace("\\!","!").split(": ")
@@ -170,6 +170,15 @@ def is_identical(req, parameter):
 
     if settings.base_request["text"].replace(settings.basePayload, "") == req.text.replace(parameter, ""):
         return True
+
+    diff_timer_requests =  abs(settings.base_request["time"] - int(req.elapsed.total_seconds()*1000))
+
+    if diff_timer_requests >= settings.difftimer:
+        return False
+
+    #print(f"Text Similiratity: {(difference_of_text*100)}%")
+    #print(f"Difference with len of page1 {len(req1.content)}, page2 {len(req2.content)}")
+
     ## Well use "Real_quick_ratio" instead of "quick_ratio"
     ## This is needed because a page with a small length could be hard to match at +98% with an other page
     ## Eg: page1 = "abcd" page2 = "abce"; difference = 1 caracter but match is 75% !
@@ -177,13 +186,6 @@ def is_identical(req, parameter):
         difference_of_text = difflib.SequenceMatcher(None, settings.base_request["text"], req.text).quick_ratio()
     else:
         difference_of_text = difflib.SequenceMatcher(None, settings.base_request["text"], req.text).ratio()
-
-    diff_timer_requests =  abs(settings.base_request["time"] - int(req.elapsed.total_seconds()*1000))
-
-    if diff_timer_requests >= settings.difftimer:
-        return False
-    #print(f"Text Similiratity: {(difference_of_text*100)}%")
-    #print(f"Difference with len of page1 {len(req1.content)}, page2 {len(req2.content)}")
 
     if settings.base_request["status"] == req.status_code and difference_of_text > settings.difference:
         return True
