@@ -143,6 +143,7 @@ def get_base_request():
 
         print(f"{yellow}Forcing test (might be a total failure){end}")
     if req == None and not settings.forceTest:
+        print(f"{red}Error in base request !")
         print(f"{red}Stopping here...{end}")
         exit(42)
     elif req != None:
@@ -188,6 +189,20 @@ def is_identical(req, parameter):
         return True
 
     return False
+
+
+def calc_remove_len(req1, parameter):
+    words_reflexions = settings.base_request["text"].count(parameter)
+    new_words_reflexions = req1.text.count(parameter)
+
+    if new_words_reflexions == 0:
+        return 0
+
+    if new_words_reflexions > 0 and words_reflexions == 0:
+        return new_words_reflexions
+
+    if new_words_reflexions > 0 and words_reflexions > 0:
+        return abs(new_words_reflexions - words_reflexions)
 
 
 def parse_filter(arg):
