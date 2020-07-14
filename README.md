@@ -1,7 +1,7 @@
 # SuperTruder
 An intruder custom that gave me bounties
 
-This program is pip-free ! no need to install any shitty pip package to work. You're welcome.
+This program is pip-free ! no need to install any shitty pip package to work (excepted Requests ofc). You're welcome.
 
 # Command examples
 
@@ -11,7 +11,7 @@ This program is pip-free ! no need to install any shitty pip package to work. Yo
 - Fuzz anything in the POST data, and don't select 404 & 302 responses:
 `python3 supertruder.py -p database/3digits.txt --threads 15 -f n404,n302 -u "https://example.com/" -d "id=§"`
 
-- Fuzz a list of urls and save contents:
+- Fuzz a list of urls and save contents (useful in bughunting):
 `python3 supertruder.py --threads 100 -p tests/urls.urls -u "§" --ignoreBaseRequest --timeout 30 -o htmldump.html`
 
 - Fuzz something and match EXACTLY a response type, text and everything you know:
@@ -23,8 +23,8 @@ This program is pip-free ! no need to install any shitty pip package to work. Yo
 - Fuzz something in the headers of the request:
 `python3 supertruder.py --threads 30 -p database/3d.txt -u "https://google.fr/" -f n403,n404,n400 -H "IS-THIS-A-REAL-HEADER: §" -o reports/google_header_3digitspayload.html`
 
+
 The limit is pretty much your imagination...
-[...]
 
 # Usage
 ```
