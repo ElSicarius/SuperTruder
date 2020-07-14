@@ -1,6 +1,8 @@
 # SuperTruder
 An intruder custom that gave me bounties
 
+If the code is disgusting, it's okay, I can live with it :)
+
 This program is pip-free ! no need to install any shitty pip package to work (excepted Requests ofc). You're welcome.
 
 # Command examples
