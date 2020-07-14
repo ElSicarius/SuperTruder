@@ -15,25 +15,35 @@ This program is pip-free ! no need to install any shitty pip package to work. Yo
 `python3 supertruder.py --threads 100 -p tests/urls.urls -u "§" --ignoreBaseRequest --timeout 30 -o htmldump.html`
 
 - Fuzz something and match EXACTLY a response type, text and everything you know:
-`python3 supertruder.py --threads 20 -p database/payloads.txt -u "http://example.com/specialparameter=§" -b "mySpecialParameter" --matchBaseRequest`
+`python3 supertruder.py --threads 20 -p database/payloads.txt -u "http://example.com/specialparameter=§" -b "mySpecialValue" --matchBaseRequest`
 
 - Fuzz something and match responses with content-length in range or matching values:
 `python3 supertruder.py --threads 20 -p database/payloads.txt -u "http://example.com/lengthchanging=§" -l 2000,2300 -el 2250,2251`
 
+- Fuzz something in the headers of the request:
+`python3 supertruder.py --threads 30 -p database/3d.txt -u "https://google.fr/" -f n403,n404,n400 -H "IS-THIS-A-REAL-HEADER: §" -o reports/google_header_3digitspayload.html`
+
+The limit is pretty much your imagination...
 [...]
 
 # Usage
 ```
-usage: supertruder.py [-h] [-S REPLACESTR] [-d DATA] [-f FILTER] [-l LENGTHFILTER] [-m] [-el EXCLUDELENGTH] [-t TIMEFILTER] [-b BASEPAYLOAD] [-o DUMPHTML] [-p PAYLOAD] [-r] [-u URL] [-H HEADERS]
-                      [--difftimer DIFFTIMER] [--forceEncode] [--offset OFFSET] [--quickRatio] [--textDifference TEXTDIFFERENCE] [--threads THREADS] [--timeout TIMEOUT] [--uselessprint] [--verify]
-                      [--ignoreBaseRequest]
+usage: supertruder.py [-h] [-u URL] [-p PAYLOAD] [-d DATA] [-b BASEPAYLOAD] [-H HEADERS] [-S REPLACESTR] [-f FILTER] [-l LENGTHFILTER] [-m] [-el EXCLUDELENGTH] [-t TIMEFILTER] [-o DUMPHTML] [--offset OFFSET] [-r] [--forceEncode] [--timeout TIMEOUT] [--throttle THROTTLE]
+                      [--verify] [--difftimer DIFFTIMER] [--textDifference TEXTDIFFERENCE] [--quickRatio] [--threads THREADS] [--ignoreBaseRequest] [--uselessprint]
 
-SuperTruder: Fuzz something, somewhere in an URL
+SuperTruder: Fuzz something, somewhere in an URL, data or headers
 
 optional arguments:
   -h, --help            show this help message and exit
-  -S REPLACESTR, --replaceStr REPLACESTR
+  -u URL, --url URL     Url to test
+  -p PAYLOAD, --payload PAYLOAD
+                        payload file
   -d DATA, --data DATA  Add POST data
+  -b BASEPAYLOAD, --basePayload BASEPAYLOAD
+                        Payload for base request
+  -H HEADERS, --headers HEADERS
+                        Add extra Headers (syntax: "header: value\nheader2: value2")
+  -S REPLACESTR, --replaceStr REPLACESTR
   -f FILTER, --filter FILTER
                         Filter positives match with httpcode, comma separated, to exclude one: n200
   -l LENGTHFILTER, --lengthFilter LENGTHFILTER
@@ -43,42 +53,39 @@ optional arguments:
                         Specify the len range that we'll use to deny responses (eg: 0,999 or any, if 3 values, we'll refuse EXACTLY this values)
   -t TIMEFILTER, --timeFilter TIMEFILTER
                         Specify the time range that we'll use to accept responses (eg: 0,999 or any, if 3 values, we'll accept EXACTLY this values)
-  -b BASEPAYLOAD, --basePayload BASEPAYLOAD
-                        Payload for base request
   -o DUMPHTML, --dumpHtml DUMPHTML
                         file to dump html content
-  -p PAYLOAD, --payload PAYLOAD
-                        payload file
+  --offset OFFSET       Start over where you stopped by giving the payload offset
   -r, --redir           Allow HTTP redirects
-  -u URL, --url URL     Url to test
-  -H HEADERS, --headers HEADERS
-                        Add extra Headers (syntax: "header: value,header2: value2")
+  --forceEncode         Force URL encode
+  --timeout TIMEOUT
+  --throttle THROTTLE   throttle between the requests
+  --verify
   --difftimer DIFFTIMER
                         Change the default matching timer (default 2000ms -> 2 seconds)
-  --forceEncode         Force URL encode
-  --offset OFFSET       Start over where you stopped by giving the payload offset
-  --quickRatio          Force quick ratio of pages (a bit faster)
   --textDifference TEXTDIFFERENCE
                         Percentage difference to match pages default: 99%
+  --quickRatio          Force quick ratio of pages (a bit faster)
   --threads THREADS
-  --timeout TIMEOUT
-  --uselessprint        Enable Louka-friendly program
-  --verify
   --ignoreBaseRequest   Force testing even if base request failed
+  --uselessprint        Enable Louka-friendly program
+
+Tired of using ffuf ? tired of using burp's slow intruder ? checkout SuperTruder, an intruder that isn't hard to use, or incredibly slow...
 ```
 
 # Note
 I'm using colored printing coz it's beautiful. you can't disable it (yet).
+if you REALLLY want to disable it, replace the color values in const.py with empty values.
 
 Not happy with \r printing ? use `--uselessprint` flag.
 
 # Todo
 
-- Work on a headers fuzzing feature
+?
 
 # Ideas
 -> for fuzzing -> create a raw request ?
 
 # It's beautiful
 
-https://asciinema.org/a/8ISmRJSnqop9j0cBW6GlpB5Wr
+<a href="https://asciinema.org/a/9Y31ZvMsytUC00pqAUjlvgN2r"><img src="./images/asciinema.gif"/></a>
