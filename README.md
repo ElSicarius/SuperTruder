@@ -82,7 +82,6 @@ if you REALLLY want to disable it, replace the color values in const.py with emp
 Not happy with \r printing ? use `--uselessprint` flag.
 
 # Todo
-
 ?
 
 # Ideas
