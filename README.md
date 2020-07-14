@@ -90,4 +90,4 @@ Not happy with \r printing ? use `--uselessprint` flag.
 
 # It's beautiful
 
-<a href="https://asciinema.org/a/9Y31ZvMsytUC00pqAUjlvgN2r"><img src="./images/asciinema.gif"/></a>
+<a href="https://asciinema.org/a/NxUbbjcZI4uCE2Y8ch2Ecw3s8"><img src="./images/asciinema.gif"/></a>
