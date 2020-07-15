@@ -185,8 +185,9 @@ def main():
         thread._threads_queues.clear()
 
     print(f"{dark_blue}[+] Done{end}" + " " * settings.termlength)
+    print(f"{dark_blue}[+] Time elapsed: {yellow}{time_print}")
     print(
-        f"Errors encountered: {settings.errors_count}, requests retryed: {settings.retry_count}")
+        f"{dark_blue}Errors encountered: {yellow}{settings.errors_count}, {dark_blue}requests retryed: {yellow}{settings.retry_count}{end}")
 
 
 if __name__ == '__main__':
