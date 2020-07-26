@@ -172,14 +172,14 @@ def main():
                         pass
     except KeyboardInterrupt:
         print(" " * settings.termlength, end="\r")
-        print(f"{red}[KILLED] Process cancelled. Info: \n{red}time: {yellow}{time_print} \n{red}Payload index: {yellow}{format(current_status, f'0{len(str(payload_len))}')}/{payload_len} -> \"{payload[current_status]}\" \n{red}Current URL: {yellow}{r.url}{end}"[:settings.termlength - 20])
+        print(f"{red}[KILLED] Process cancelled. Info: \n{red}time: {yellow}{time_print} \n{red}Payload index: {yellow}{format(current_status, f'0{len(str(payload_len))}')}/{payload_len} -> \"{payload[current_status]}\" \n{red}Current URL (encoded): {yellow}{r.url}{end}")
         print(
             f"\n{red}[-] Keyboard interrupt recieved, gracefully exiting........... Nah kill everything.{end}")
         executor._threads.clear()
         thread._threads_queues.clear()
     except Exception as e:
         print(" " * settings.termlength, end="\r")
-        print(f"{red}[KILLED] Process killed. Info: \n{red}time: {yellow}{time_print} \n{red}Payload index: {yellow}{format(current_status, f'0{len(str(payload_len))}')}/{payload_len} -> \"{payload[current_status]}\" \n{red}Current URL: {yellow}{r.url}{end}"[:settings.termlength - 20])
+        print(f"{red}[KILLED] Process killed. Info: \n{red}time: {yellow}{time_print} \n{red}Payload index: {yellow}{format(current_status, f'0{len(str(payload_len))}')}/{payload_len} -> \"{payload[current_status]}\" \n{red}Current URL (encoded): {yellow}{r.url}{end}")
         print(f"\n{red}[FATAL] Unhandled exception : {e}{end}")
         executor._threads.clear()
         thread._threads_queues.clear()
