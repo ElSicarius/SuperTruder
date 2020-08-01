@@ -157,7 +157,7 @@ def get_base_request():
         {light_blue}status: {color_status(req.status_code)}{end},
         {light_blue}content-length: {end}{len(req.text)-len(payload) if payload in req.text else len(req.text)},
         {light_blue}request time: {end}{round(req.elapsed.total_seconds()*1000, 3)}{end},
-        {light_blue}Request text (trucated) was: {banner}{req.text if len(req.text)<=100 else req.text[:50]+f" {yellow}[...]{end} "+req.text[-50:]}\n""")
+        {light_blue}Request text (trucated) was: {banner}{req.text if len(req.text)<=100 else req.text[:50]+f" {yellow}[...] "+req.text[-50:]}\n""")
 
     elif req == None:
         settings.base_request = {"req": None,
