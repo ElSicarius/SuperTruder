@@ -201,7 +201,10 @@ def is_identical(req, parameter):
 
 
 def calc_remove_len(req1, parameter):
-    words_reflexions = settings.base_request["text"].count(parameter)
+    if settings.base_request["text"] != None :
+        words_reflexions = settings.base_request["text"].count(parameter)
+    else:
+        words_reflexions = 0
     new_words_reflexions = req1.text.count(parameter)
 
     if new_words_reflexions == 0:
@@ -395,4 +398,4 @@ def status_matching(status):
     if status in settings.httpcodesFilter["allow"]:
         return True
 
-    return True
+    return False
