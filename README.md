@@ -39,49 +39,70 @@ The limit is pretty much your imagination...
 
 # Usage
 ```
-usage: supertruder.py [-h] [-u URL] [-p PAYLOAD] [-d DATA] [-b BASEPAYLOAD] [-H HEADERS] [-S REPLACESTR] [-f FILTER] [-l LENGTHFILTER] [-m] [-el EXCLUDELENGTH] [-t TIMEFILTER] [-o DUMPHTML] [--offset OFFSET] [-r] [--forceEncode] [--timeout TIMEOUT] [--throttle THROTTLE]
-                      [--verify] [--difftimer DIFFTIMER] [--textDifference TEXTDIFFERENCE] [--quickRatio] [--threads THREADS] [--ignoreBaseRequest] [--uselessprint]
+usage: supertruder.py [-h] [-u URL] [-p PAYLOAD] [-P DISTANT_PAYLOAD]
+                      [-d DATA] [-b BASEPAYLOAD] [-H HEADERS] [-S REPLACESTR]
+                      [-f FILTER] [-l LENGTHFILTER] [-m] [-el EXCLUDELENGTH]
+                      [-t TIMEFILTER] [-o DUMPHTML] [--offset OFFSET] [-r]
+                      [--forceEncode] [--timeout TIMEOUT]
+                      [--throttle THROTTLE] [--verify] [--difftimer DIFFTIMER]
+                      [--textDifference TEXTDIFFERENCE] [--quickRatio]
+                      [--threads THREADS] [--ignoreBaseRequest]
+                      [--uselessprint]
 
-SuperTruder: Fuzz something, somewhere in an URL, data or headers
+SuperTruder: Fuzz something, somewhere in an URL, data or HTTP headers
 
 optional arguments:
   -h, --help            show this help message and exit
   -u URL, --url URL     Url to test
   -p PAYLOAD, --payload PAYLOAD
                         payload file
+  -P DISTANT_PAYLOAD, --distant_payload DISTANT_PAYLOAD
+                        use an online wordlist instead of a local one (do not
+                        use if your internet connection is shit, or the
+                        wordlist weight is like To)
   -d DATA, --data DATA  Add POST data
   -b BASEPAYLOAD, --basePayload BASEPAYLOAD
                         Payload for base request
   -H HEADERS, --headers HEADERS
-                        Add extra Headers (syntax: "header: value\nheader2: value2")
+                        Add extra Headers (syntax: "header: value\nheader2:
+                        value2")
   -S REPLACESTR, --replaceStr REPLACESTR
   -f FILTER, --filter FILTER
-                        Filter positives match with httpcode, comma separated, to exclude one: n200
+                        Filter positives match with httpcode, comma separated,
+                        to exclude one: n200
   -l LENGTHFILTER, --lengthFilter LENGTHFILTER
-                        Specify the len range that we'll use to accept responses (eg: 0,999 or any, if 3 values, we'll accept EXACTLY this values)
+                        Specify the len range that we'll use to accept
+                        responses (eg: 0,999 or any, if 3 values, we'll accept
+                        EXACTLY this values)
   -m, --matchBaseRequest
   -el EXCLUDELENGTH, --excludeLength EXCLUDELENGTH
-                        Specify the len range that we'll use to deny responses (eg: 0,999 or any, if 3 values, we'll refuse EXACTLY this values)
+                        Specify the len range that we'll use to deny responses
+                        (eg: 0,999 or any, if 3 values, we'll refuse EXACTLY
+                        this values)
   -t TIMEFILTER, --timeFilter TIMEFILTER
-                        Specify the time range that we'll use to accept responses (eg: 0,999 or any, if 3 values, we'll accept EXACTLY this values)
+                        Specify the time range that we'll use to accept
+                        responses (eg: 0,999 or any, if 3 values, we'll accept
+                        EXACTLY this values)
   -o DUMPHTML, --dumpHtml DUMPHTML
                         file to dump html content
-  --offset OFFSET       Start over where you stopped by giving the payload offset
+  --offset OFFSET       Start over where you stopped by giving the payload
+                        offset
   -r, --redir           Allow HTTP redirects
   --forceEncode         Force URL encode
   --timeout TIMEOUT
   --throttle THROTTLE   throttle between the requests
   --verify
   --difftimer DIFFTIMER
-                        Change the default matching timer (default 2000ms -> 2 seconds)
+                        Change the default matching timer (default 2000ms -> 2
+                        seconds)
   --textDifference TEXTDIFFERENCE
                         Percentage difference to match pages default: 99%
   --quickRatio          Force quick ratio of pages (a bit faster)
   --threads THREADS
   --ignoreBaseRequest   Force testing even if base request failed
-  --uselessprint        Enable Louka-friendly program
+  --uselessprint        Disable useless self-rewriting print (with '\r')
 
-Tired of using ffuf ? tired of using burp's slow intruder ? checkout SuperTruder, an intruder that isn't hard to use, or incredibly slow...
+Tired of using ffuf ? Tired of using burp's slow intruder ? Checkout SuperTruder, an intruder that isn't hard to use, or incredibly slow Made with love by Sicarius (@AMTraaaxX)
 ```
 
 # Note
