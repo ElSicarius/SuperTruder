@@ -34,7 +34,7 @@ class Settings:
         self.excludeLength = parse_excluded_length(args.excludeLength)
         self.forceEncode = args.forceEncode
         self.throttle = float(args.throttle)
-        self.httpcodesFilter = parse_filter(args.filter)
+        self.httpcodesFilter, self.status_table_printable = parse_filter(args.filter)
         self.lengthFilter = parse_length_time_filter(args.lengthFilter)
         self.matchBase = args.matchBaseRequest
         self.out = args.dumpHtml
@@ -118,7 +118,7 @@ class Settings:
         {light_blue}Dumping HTML pages: {end}{"True, outfile:"+self.out if self.out else "False"}
 
 {green}Current Trigger settings:
-        {light_blue}Selecting HTTP status code: {end}{self.httpcodesFilter}
+        {light_blue}Selecting HTTP status code: {end}{self.status_table_printable}
         {light_blue}{length_message}
         {light_blue}{time_message}
         {light_blue}Excluding length mathing: {end}{self.excludeLength}
@@ -219,16 +219,36 @@ def calc_remove_len(req1, parameter):
 
 def parse_filter(arg):
     status_table = dict({"deny": [], "allow": []})
+    status_table_printable = dict({"deny": [], "allow": []})
     if 'any' in arg.lower():
         status_table["allow"].append("any")
+        status_table_printable["allow"].append("any")
         return status_table
     arg = arg.split(",")
     for code in arg:
+        #populate printable table
         if code.startswith("n"):
-            status_table["deny"].append(int(code[1:], 10))
+            status_table_printable["deny"].append(code)
         else:
-            status_table["allow"].append(int(code, 10))
-    return status_table
+            status_table_printable["allow"].append(code)
+        #populate table used by script
+        if code.endswith("x"):
+            for dizaines in range(10):
+                for iteration in range(10):
+                    if code.startswith("n"):
+                        status_table["deny"].append(int(f"{code[1:2]}{dizaines}{iteration}", 10))
+                    else:
+                        status_table["allow"].append(int(f"{code[:1]}{dizaines}{iteration}", 10))
+        else:
+            if code.startswith("n"):
+                status_table["deny"].append(int(code[1:], 10))
+            else:
+                status_table["allow"].append(int(code, 10))
+
+    if len(status_table["deny"]) > 0 and len(status_table["allow"]) == 0:
+        status_table["allow"].append("any")
+        status_table_printable["allow"].append("any")
+    return status_table, status_table_printable
 
 
 def parse_length_time_filter(args):
