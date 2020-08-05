@@ -21,7 +21,7 @@ def set_global(settings):
 
 class Settings:
     def __init__(self, args):
-        if not args.url or not args.payload:
+        if not args.url or not (args.payload or args.distant_payload) :
             print(f"{red}Error, not enough args, see help (-h) for more details{end}")
             exit(42)
 
@@ -41,6 +41,7 @@ class Settings:
         if self.out:
             self.fileStream = open(self.out, "ab+")
         self.payloadFile = args.payload
+        self.distant_payload = args.distant_payload
         self.payload_offset = int(args.offset)
         self.quick_ratio = args.quickRatio
         self.redir = args.redir
@@ -109,6 +110,7 @@ class Settings:
             {light_blue}Headers: {end}{self.headers}
             {light_blue}Data: {end}{self.data if self.data == None or len(self.data)<=20 else self.data[:10]+f"{yellow}[...]{end}"+self.data[-10:]}
         {light_blue}Payloads file: {end}{self.payloadFile}
+        {light_blue}Payload URL: {end}{self.distant_payload}
         {light_blue}Base payload: {end}{self.basePayload}
         {light_blue}Redirections allowed: {end}{self.redir}
         {light_blue}Timeout of requests: {end}{self.timeout}

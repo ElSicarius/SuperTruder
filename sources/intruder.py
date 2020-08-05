@@ -26,6 +26,7 @@ def main():
     # Fuzzing stuff
     parser.add_argument('-u', "--url", help='Url to test',)
     parser.add_argument('-p', "--payload", help='payload file',)
+    parser.add_argument('-P', "--distant_payload", help="use an online wordlist instead of a local one (do not use if your internet connection is shit, or the wordlist weight is like To)", default=False)
     parser.add_argument("-d", "--data", default=None, help="Add POST data")
     parser.add_argument('-b', "--basePayload",
                         help="Payload for base request", default="Sicarius")
@@ -82,13 +83,25 @@ def main():
 
     base_request = get_base_request()
 
-    print(f"{dark_blue}Loading wordlist, please wait...{end}")
-    try:
-        with open(settings.payloadFile, "r") as f:
-            payloaddata = f.read()
-    except Exception as e:
-        print(f"{red}Error: cannot read file {settings.payloadFile} Error: {e}{end}")
-        exit(42)
+    print(f"\n{dark_blue}Loading wordlist, please wait...{end}")
+    if not settings.payloadFile and settings.distant_payload:
+        req = None
+        print(f"{yellow}Downloading wordlist @ {settings.distant_payload}{end}")
+        try:
+            req = get(settings.distant_payload, timeout=settings.timeout, allow_redirects=settings.redir, verify=settings.verify)
+        except Exception as e:
+            print(f"{red}Error: cannot reach file at {settings.distant_payload} Error: {e}{end}")
+            print(f"{red}Request info: {yellow} Status {req.status_code}{end}")
+            exit(42)
+        print(f"{dark_blue}Wordlist downloaded successfully{end}")
+        payloaddata = req.text
+    else:
+        try:
+            with open(settings.payloadFile, "r") as f:
+                payloaddata = f.read()
+        except Exception as e:
+            print(f"{red}Error: cannot read file {settings.payloadFile} Error: {e}{end}")
+            exit(42)
 
     # payload file processing
 
