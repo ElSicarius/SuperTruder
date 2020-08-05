@@ -10,6 +10,9 @@ This program is pip-free ! no need to install any shitty pip package to work (ex
 - fuzz anything in the url:
 `python3 supertruder.py -p database/3digits.txt --threads 15 -f 200 -u "https://example.com/id=§" `
 
+- Fuzz anything in the url with a distant payload file:
+`python3 supertruder.py -u "https://google.fr/§" -P https://raw.githubusercontent.com/danielmiessler/SecLists/master/Fuzzing/1-4_all_letters_a-z.txt --threads 20 -f n50x`
+
 - Fuzz anything in the POST data, and don't select 404 & 302 responses:
 `python3 supertruder.py -p database/3digits.txt --threads 15 -f n404,n302 -u "https://example.com/" -d "id=§"`
 
