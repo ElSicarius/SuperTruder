@@ -225,7 +225,7 @@ def parse_filter(arg):
     if 'any' in arg.lower():
         status_table["allow"].append("any")
         status_table_printable["allow"].append("any")
-        return status_table
+        return status_table, status_table_printable
     arg = arg.split(",")
     for code in arg:
         #populate printable table

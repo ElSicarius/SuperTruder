@@ -1,0 +1,14 @@
+#!/usr/bin/python3
+
+import sys
+try:
+    A = open(sys.argv[1], 'r').read()
+    B = open(sys.argv[2], 'r').read()
+    C = open(sys.argv[3], 'a+')
+except Exception as e:
+    print(f"Error. {e}")
+else:
+    for a in A.split("\n"):
+        for b in B.split("\n"):
+            C.write(f"{a}{'' if len(sys.argv) < 5 else sys.argv[4] }{b}\n")
+C.close()

@@ -1,0 +1,6 @@
+#!/usr/bin/python3
+import sys
+
+file = open(sys.argv[1],"a+")
+for i in sys.argv[2:]:
+    file.write(i+"\n")
