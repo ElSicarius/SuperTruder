@@ -222,12 +222,17 @@ def parse_filter(arg):
     status_table_printable = dict({"deny": [], "allow": []})
     if 'any' in arg.lower():
         status_table["allow"].append("any")
-        status_table_printable.append("any")
+        status_table_printable["allow"].append("any")
         return status_table
     arg = arg.split(",")
     for code in arg:
+        #populate printable table
+        if code.startswith("n"):
+            status_table_printable["deny"].append(code)
+        else:
+            status_table_printable["allow"].append(code)
+        #populate table used by script
         if code.endswith("x"):
-
             for dizaines in range(10):
                 for iteration in range(10):
                     if code.startswith("n"):
@@ -239,12 +244,10 @@ def parse_filter(arg):
                 status_table["deny"].append(int(code[1:], 10))
             else:
                 status_table["allow"].append(int(code, 10))
-        if code.startswith("n"):
-            status_table_printable["deny"].append(code)
-        else:
-            status_table_printable["allow"].append(code)
+
     if len(status_table["deny"]) > 0 and len(status_table["allow"]) == 0:
         status_table["allow"].append("any")
+        status_table_printable["allow"].append("any")
     return status_table, status_table_printable
 
 
