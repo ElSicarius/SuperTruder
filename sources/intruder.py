@@ -110,7 +110,7 @@ def main():
     if settings.payload_offset > 0:
         print(
             f"{yellow}Starting from the payload n°{settings.payload_offset}/{payload_len}: '{payload[settings.payload_offset]}'{end}")
-    print(f"{dark_blue}Wordlist loaded ! :}} {end}\n")
+    print(f"{dark_blue}Wordlist loaded ! We have {yellow}{payload_len}{dark_blue} items in this wordlist :}} {end}\n")
     # Attempt connection to each URL and print stats
 
     print(f"{bold}Time\tPayload_index\tStatus\tLength\tResponse_time\tPayload")
