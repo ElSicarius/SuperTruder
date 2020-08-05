@@ -13,6 +13,12 @@ This program is pip-free ! no need to install any shitty pip package to work (ex
 - Fuzz anything in the POST data, and don't select 404 & 302 responses:
 `python3 supertruder.py -p database/3digits.txt --threads 15 -f n404,n302 -u "https://example.com/" -d "id=§"`
 
+- Fuzz anything in the URL, and don't select 40x responses:
+`python3 supertruder.py -p database/3digits.txt --threads 15 -f n40x -u "https://example.com/§" `
+
+- Fuzz anything in the URL, and select only 50x responses:
+`python3 supertruder.py -p database/3digits.txt --threads 15 -f 50x -u "https://example.com/§" `
+
 - Fuzz a list of urls and save contents (useful in bughunting):
 `python3 supertruder.py --threads 100 -p tests/urls.urls -u "§" --ignoreBaseRequest --timeout 30 -o htmldump.html`
 
