@@ -125,7 +125,9 @@ def main():
     print(f"{dark_blue}Wordlist loaded ! We have {yellow}{payload_len}{dark_blue} items in this wordlist :}} {end}\n", file=settings.stdout)
     # Attempt connection to each URL and print stats
 
-    print(f"{bold}Time\tPayload_index\tStatus\tLength\tResponse_time\tPayload",
+    # ugly stuff here
+    printstr = "Time\tPayload_index\tStatus\tLength\tResponse_time\tPayload" if not settings.quietmode else "Payload"
+    print(f"{bold}{printstr}",
           file=settings.stdout)
     print("-" * 100 + end, file=settings.stdout)
 
@@ -178,9 +180,7 @@ def main():
                                     r.url)
                                 print(f"{' '*(settings.termlength)}",
                                       end="\r", file=settings.stdout)
-                                
-                                print(
-                                    f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{status}\t{length}\t{timer}\t\t{p}{end}")
+                                print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{status}\t{length}\t{timer}\t\t{p}{end}" if not settings.quietmode else f"{p}{end}")
 
                                 if settings.out and len(r.content) != 0:
                                     try:

@@ -39,6 +39,7 @@ class Settings:
         self.lengthFilter = parse_length_time_filter(args.lengthFilter)
         self.matchBase = args.matchBaseRequest
         self.stdout = open(os.devnull, 'w') if args.quiet else sys.__stdout__
+        self.quietmode = True if args.quiet else False
         self.out = args.dumpHtml
         if self.out:
             self.fileStream = open(self.out, "ab+")
