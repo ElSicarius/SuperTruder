@@ -10,6 +10,9 @@ This program is pip-free ! no need to install any shitty pip package to work (ex
 - fuzz anything in the url:
 `python3 supertruder.py -p database/3digits.txt --threads 15 -f 200 -u "https://example.com/id=§" `
 
+- fuzz anything in the url & output only the results:
+`python3 supertruder.py -p database/3digits.txt --threads 15 -f 200 -u "https://example.com/id=§" -q `
+
 - Fuzz anything in the url with a distant payload file:
 `python3 supertruder.py -u "https://google.fr/§" -P https://raw.githubusercontent.com/danielmiessler/SecLists/master/Fuzzing/1-4_all_letters_a-z.txt --threads 20 -f n50x`
 
@@ -34,6 +37,8 @@ This program is pip-free ! no need to install any shitty pip package to work (ex
 - Fuzz something in the headers of the request:
 `python3 supertruder.py --threads 30 -p database/3d.txt -u "https://google.fr/" -f n403,n404,n400 -H "IS-THIS-A-REAL-HEADER: §" -o reports/google_header_3digitspayload.html`
 
+- Fuzz a list of urls but shuffle them before:
+`python3 supertruder.py -t 10 --ignoreBaseRequest -u "§" -p /mnt/c/Users//BugBounty/program1/urls_multiple_hosts -f n30x -q --shuffle`
 
 The limit is pretty much your imagination...
 
