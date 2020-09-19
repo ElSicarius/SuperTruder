@@ -14,9 +14,6 @@ __version__ = "1.0"
 __author__ = "Sicarius (@AMTraaaxX)"
 
 
-print(f"\n{banner}########## SuperTruder v{__version__}, made with love by {__author__} ##########{end}")
-
-
 def main():
     packages.urllib3.disable_warnings()
 
@@ -26,7 +23,8 @@ def main():
     # Fuzzing stuff
     parser.add_argument('-u', "--url", help='Url to test',)
     parser.add_argument('-p', "--payload", help='payload file',)
-    parser.add_argument('-P', "--distant_payload", help="use an online wordlist instead of a local one (do not use if your internet connection is shit, or the wordlist weight is like To)", default=False)
+    parser.add_argument('-P', "--distant_payload",
+                        help="use an online wordlist instead of a local one (do not use if your internet connection is shit, or the wordlist weight is like To)", default=False)
     parser.add_argument("-d", "--data", default=None, help="Add POST data")
     parser.add_argument('-b', "--basePayload",
                         help="Payload for base request", default="Sicarius")
@@ -73,34 +71,44 @@ def main():
                         action="store_true", help="Force testing even if base request failed")
     parser.add_argument("--uselessprint", help="Disable useless self-rewriting print (with '\\r')",
                         default=False, action="store_true")
+    parser.add_argument("-q", "--quiet", help="tell the program tu output only the results",
+                        default=False, action="store_true")
 
     args = parser.parse_args()
 
     settings = Settings(args)
+    print(f"\n{banner}########## SuperTruder v{__version__}, made with love by {__author__} ##########{end}", file=settings.stdout)
     set_global(settings)
-    print(settings)
+    print(settings, file=settings.stdout)
     del args
 
     base_request = get_base_request()
 
-    print(f"\n{dark_blue}Loading wordlist, please wait...{end}")
+    print(f"\n{dark_blue}Loading wordlist, please wait...{end}",
+          file=settings.stdout)
     if not settings.payloadFile and settings.distant_payload:
         req = None
-        print(f"{yellow}Downloading wordlist @ {settings.distant_payload}{end}")
+        print(f"{yellow}Downloading wordlist @ {settings.distant_payload}{end}",
+              file=settings.stdout)
         try:
-            req = get(settings.distant_payload, timeout=settings.timeout, allow_redirects=settings.redir, verify=settings.verify)
+            req = get(settings.distant_payload, timeout=settings.timeout,
+                      allow_redirects=settings.redir, verify=settings.verify)
         except Exception as e:
-            print(f"{red}Error: cannot reach file at {settings.distant_payload} Error: {e}{end}")
-            print(f"{red}Request info: {yellow} Status {req.status_code}{end}")
+            print(f"{red}Error: cannot reach file at {settings.distant_payload} Error: {e}{end}",
+                  file=settings.stdout)
+            print(f"{red}Request info: {yellow} Status {req.status_code}{end}",
+                  file=settings.stdout)
             exit(42)
-        print(f"{dark_blue}Wordlist downloaded successfully{end}")
+        print(f"{dark_blue}Wordlist downloaded successfully{end}",
+              file=settings.stdout)
         payloaddata = req.text
     else:
         try:
             with open(settings.payloadFile, "r") as f:
                 payloaddata = f.read()
         except Exception as e:
-            print(f"{red}Error: cannot read file {settings.payloadFile} Error: {e}{end}")
+            print(f"{red}Error: cannot read file {settings.payloadFile} Error: {e}{end}",
+                  file=settings.stdout)
             exit(42)
 
     # payload file processing
@@ -109,12 +117,13 @@ def main():
     payload_len = len(payload)
     if settings.payload_offset > 0:
         print(
-            f"{yellow}Starting from the payload n°{settings.payload_offset}/{payload_len}: '{payload[settings.payload_offset]}'{end}")
-    print(f"{dark_blue}Wordlist loaded ! We have {yellow}{payload_len}{dark_blue} items in this wordlist :}} {end}\n")
+            f"{yellow}Starting from the payload n°{settings.payload_offset}/{payload_len}: '{payload[settings.payload_offset]}'{end}", file=settings.stdout)
+    print(f"{dark_blue}Wordlist loaded ! We have {yellow}{payload_len}{dark_blue} items in this wordlist :}} {end}\n", file=settings.stdout)
     # Attempt connection to each URL and print stats
 
-    print(f"{bold}Time\tPayload_index\tStatus\tLength\tResponse_time\tPayload")
-    print("-" * 100 + end)
+    print(f"{bold}Time\tPayload_index\tStatus\tLength\tResponse_time\tPayload",
+          file=settings.stdout)
+    print("-" * 100 + end, file=settings.stdout)
 
     # We're not like chrome
     del payloaddata
@@ -137,7 +146,8 @@ def main():
                     r, p = futu.result()
                     current_status = payload.index(p)
                 except Exception as e:
-                    print(f"{red}An Unhandled error occured in thread: {e}{end}")
+                    print(
+                        f"{red}An Unhandled error occured in thread: {e}{end}", file=settings.stdout)
                     pass
                 else:
                     if r != None:
@@ -162,9 +172,10 @@ def main():
                                 timer = str(response_time)
                                 url = r.url if not settings.forceEncode else unquote(
                                     r.url)
-                                print(f"{' '*(settings.termlength)}", end="\r")
+                                print(f"{' '*(settings.termlength)}",
+                                      end="\r", file=settings.stdout)
                                 print(
-                                    f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{status}\t{length}\t{timer}\t\t{p}{end}")
+                                    f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{status}\t{length}\t{timer}\t\t{p}{end}", file=settings.stdout)
 
                                 if settings.out and len(r.content) != 0:
                                     try:
@@ -173,7 +184,7 @@ def main():
                                         settings.fileStream.write(r.content)
                                     except Exception as e:
                                         print(
-                                            f"{red}Error: could not write file {settings.out} Error: {e}{end}")
+                                            f"{red}Error: could not write file {settings.out} Error: {e}{end}", file=settings.stdout)
                             else:
                                 print_nothing(
                                     time_print, current_status, payload_len, r, p)
@@ -184,23 +195,26 @@ def main():
                     else:
                         pass
     except KeyboardInterrupt:
-        print(" " * settings.termlength, end="\r")
-        print(f"{red}[KILLED] Process cancelled. Info: \n{red}time: {yellow}{time_print} \n{red}Payload index: {yellow}{format(current_status, f'0{len(str(payload_len))}')}/{payload_len} -> \"{payload[current_status]}\" \n{red}Current URL (encoded): {yellow}{r.url}{end}")
+        print(" " * settings.termlength, end="\r", file=settings.stdout)
+        print(f"{red}[KILLED] Process cancelled. Info: \n{red}time: {yellow}{time_print} \n{red}Payload index: {yellow}{format(current_status, f'0{len(str(payload_len))}')}/{payload_len} -> \"{payload[current_status]}\" \n{red}Current URL (encoded): {yellow}{r.url}{end}", file=settings.stdout)
         print(
-            f"\n{red}[-] Keyboard interrupt recieved, gracefully exiting........... Nah kill everything.{end}")
+            f"\n{red}[-] Keyboard interrupt recieved, gracefully exiting........... Nah kill everything.{end}", file=settings.stdout)
         executor._threads.clear()
         thread._threads_queues.clear()
     except Exception as e:
-        print(" " * settings.termlength, end="\r")
-        print(f"{red}[KILLED] Process killed. Info: \n{red}time: {yellow}{time_print} \n{red}Payload index: {yellow}{format(current_status, f'0{len(str(payload_len))}')}/{payload_len} -> \"{payload[current_status]}\" \n{red}Current URL (encoded): {yellow}{r.url}{end}")
-        print(f"\n{red}[FATAL] Unhandled exception : {e}{end}")
+        print(" " * settings.termlength, end="\r", file=settings.stdout)
+        print(f"{red}[KILLED] Process killed. Info: \n{red}time: {yellow}{time_print} \n{red}Payload index: {yellow}{format(current_status, f'0{len(str(payload_len))}')}/{payload_len} -> \"{payload[current_status]}\" \n{red}Current URL (encoded): {yellow}{r.url}{end}", file=settings.stdout)
+        print(f"\n{red}[FATAL] Unhandled exception : {e}{end}",
+              file=settings.stdout)
         executor._threads.clear()
         thread._threads_queues.clear()
 
-    print(f"{dark_blue}[+] Done{end}" + " " * settings.termlength)
-    print(f"{dark_blue}[+] Time elapsed: {yellow}{time_print}")
+    print(f"{dark_blue}[+] Done{end}" + " " *
+          settings.termlength, file=settings.stdout)
+    print(f"{dark_blue}[+] Time elapsed: {yellow}{time_print}",
+          file=settings.stdout)
     print(
-        f"{dark_blue}Errors encountered: {yellow}{settings.errors_count}, {dark_blue}requests retryed: {yellow}{settings.retry_count}{end}")
+        f"{dark_blue}Errors encountered: {yellow}{settings.errors_count}, {dark_blue}requests retryed: {yellow}{settings.retry_count}{end}\n", file=settings.stdout)
 
 
 if __name__ == '__main__':

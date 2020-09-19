@@ -1,4 +1,4 @@
-### some colors, needs to be global
+# some colors, needs to be global
 dark_blue = "\033[94m"
 bold = "\033[1m"
 green = "\033[92m"

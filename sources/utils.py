@@ -21,7 +21,7 @@ def set_global(settings):
 
 class Settings:
     def __init__(self, args):
-        if not args.url or not (args.payload or args.distant_payload) :
+        if not args.url or not (args.payload or args.distant_payload):
             print(f"{red}Error, not enough args, see help (-h) for more details{end}")
             exit(42)
 
@@ -34,9 +34,11 @@ class Settings:
         self.excludeLength = parse_excluded_length(args.excludeLength)
         self.forceEncode = args.forceEncode
         self.throttle = float(args.throttle)
-        self.httpcodesFilter, self.status_table_printable = parse_filter(args.filter)
+        self.httpcodesFilter, self.status_table_printable = parse_filter(
+            args.filter)
         self.lengthFilter = parse_length_time_filter(args.lengthFilter)
         self.matchBase = args.matchBaseRequest
+        self.stdout = open(os.devnull, 'w') if args.quiet else sys.__stdout__
         self.out = args.dumpHtml
         if self.out:
             self.fileStream = open(self.out, "ab+")
@@ -159,7 +161,7 @@ def get_base_request():
         {light_blue}status: {color_status(req.status_code)}{end},
         {light_blue}content-length: {end}{len(req.text)-len(payload) if payload in req.text else len(req.text)},
         {light_blue}request time: {end}{round(req.elapsed.total_seconds()*1000, 3)}{end},
-        {light_blue}Request text (trucated) was: {banner}{req.text if len(req.text)<=100 else req.text[:50]+f" {yellow}[...] "+req.text[-50:]}\n""")
+        {light_blue}Request text (trucated) was: {banner}{req.text if len(req.text)<=100 else req.text[:50]+f" {yellow}[...] "+req.text[-50:]}\n""", file=settings.stdout)
 
     elif req == None:
         settings.base_request = {"req": None,
@@ -203,7 +205,7 @@ def is_identical(req, parameter):
 
 
 def calc_remove_len(req1, parameter):
-    if settings.base_request["text"] != None :
+    if settings.base_request["text"] != None:
         words_reflexions = settings.base_request["text"].count(parameter)
     else:
         words_reflexions = 0
@@ -228,19 +230,21 @@ def parse_filter(arg):
         return status_table, status_table_printable
     arg = arg.split(",")
     for code in arg:
-        #populate printable table
+        # populate printable table
         if code.startswith("n"):
             status_table_printable["deny"].append(code)
         else:
             status_table_printable["allow"].append(code)
-        #populate table used by script
+        # populate table used by script
         if code.endswith("x"):
             for dizaines in range(10):
                 for iteration in range(10):
                     if code.startswith("n"):
-                        status_table["deny"].append(int(f"{code[1:2]}{dizaines}{iteration}", 10))
+                        status_table["deny"].append(
+                            int(f"{code[1:2]}{dizaines}{iteration}", 10))
                     else:
-                        status_table["allow"].append(int(f"{code[:1]}{dizaines}{iteration}", 10))
+                        status_table["allow"].append(
+                            int(f"{code[:1]}{dizaines}{iteration}", 10))
         else:
             if code.startswith("n"):
                 status_table["deny"].append(int(code[1:], 10))
@@ -286,9 +290,9 @@ def parse_excluded_length(arg):
 def print_nothing(time_print, current_status, payload_len, r, parameter, end="\r"):
     if settings.uselessprint:
         print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t   \t     \t     \t\t{' '*settings.termlength}"[
-              :settings.termlength - 50], end="\r")
+              :settings.termlength - 50], end="\r", file=settings.stdout)
         print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{r.status_code}\t{len(r.content)}\t{int(r.elapsed.total_seconds()*1000)}\t\t{parameter}"[
-              :settings.termlength - 50], end="\r")
+              :settings.termlength - 50], end="\r", file=settings.stdout)
 
 
 def length_matching(response_len):
@@ -359,7 +363,7 @@ def get_(url, parameter):
                   verify=settings.verify, headers=temp_headers)
         if req.status_code == 429:
             print(
-                f"Rate limit reached, increase --throttle! Current is {settings.throttle}")
+                f"Rate limit reached, increase --throttle! Current is {settings.throttle}", file=settings.stdout)
     except:
         settings.errors_count += 1
         if settings.retry:
@@ -368,7 +372,7 @@ def get_(url, parameter):
                           verify=settings.verify, headers=temp_headers)
                 if req.status_code == 429:
                     print(
-                        f"Rate limit reached, increase --throttle! Current is {settings.throttle}")
+                        f"Rate limit reached, increase --throttle! Current is {settings.throttle}", file=settings.stdout)
             except:
                 settings.retry_count += 1
                 req = None
@@ -388,7 +392,7 @@ def post_(url, data, parameter):
                    verify=settings.verify, headers=temp_headers)
         if req.status_code == 429:
             print(
-                f"Rate limit reached, increase --throttle! Current is {settings.throttle}")
+                f"Rate limit reached, increase --throttle! Current is {settings.throttle}", file=settings.stdout)
     except:
         settings.errors_count += 1
         if settings.retry:
@@ -397,7 +401,7 @@ def post_(url, data, parameter):
                            verify=settings.verify, headers=temp_headers)
                 if req.status_code == 429:
                     print(
-                        f"Rate limit reached, increase --throttle! Current is {settings.throttle}")
+                        f"Rate limit reached, increase --throttle! Current is {settings.throttle}", file=settings.stdout)
             except:
                 settings.retry_count += 1
                 req = None
