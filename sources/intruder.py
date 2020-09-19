@@ -9,6 +9,7 @@ import argparse
 import difflib
 from datetime import datetime
 from .utils import *
+import random
 
 __version__ = "1.0"
 __author__ = "Sicarius (@AMTraaaxX)"
@@ -48,6 +49,7 @@ def main():
     parser.add_argument('-o', '--dumpHtml', help='file to dump html content')
     parser.add_argument(
         "--offset", help="Start over where you stopped by giving the payload offset", default=0)
+    parser.add_argument("--shuffle", help="Shuffle the payload list", default=False, action="store_true")
 
     # request stuff
     parser.add_argument('-r', "--redir", dest="redir", default=False,
@@ -114,6 +116,8 @@ def main():
     # payload file processing
 
     payload = list(payloaddata.split('\n'))
+    if settings.shuffle:
+        random.shuffle(payload)
     payload_len = len(payload)
     if settings.payload_offset > 0:
         print(

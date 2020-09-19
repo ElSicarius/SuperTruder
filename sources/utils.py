@@ -54,6 +54,7 @@ class Settings:
         self.timeout = int(args.timeout)
         self.uselessprint = not args.uselessprint
         self.verify = args.verify
+        self.shuffle = True if args.shuffle else False
         self.headers = args.headers if args.headers == {
         } else self.loadHeaders(args.headers)
 
