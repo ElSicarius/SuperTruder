@@ -178,8 +178,9 @@ def main():
                                     r.url)
                                 print(f"{' '*(settings.termlength)}",
                                       end="\r", file=settings.stdout)
+                                
                                 print(
-                                    f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{status}\t{length}\t{timer}\t\t{p}{end}", file=settings.stdout)
+                                    f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{status}\t{length}\t{timer}\t\t{p}{end}")
 
                                 if settings.out and len(r.content) != 0:
                                     try:
