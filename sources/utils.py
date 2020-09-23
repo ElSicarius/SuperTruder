@@ -21,7 +21,7 @@ def set_global(settings):
 
 class Settings:
     def __init__(self, args):
-        if not args.url or not (args.payload or args.distant_payload):
+        if not args.url or not (args.payload or args.distant_payload or args.regexPayload):
             print(f"{red}Error, not enough args, see help (-h) for more details{end}")
             exit(42)
 
@@ -45,11 +45,18 @@ class Settings:
             self.fileStream = open(self.out, "ab+")
         self.payloadFile = args.payload
         self.distant_payload = args.distant_payload
+        self.regexPayload = args.regexPayload
         self.payload_offset = int(args.offset)
         self.quick_ratio = args.quickRatio
         self.redir = args.redir
         self.replaceStr = args.replaceStr
-        self.termlength = int(os.get_terminal_size()[0])
+        try:
+            self.termlength = int(os.get_terminal_size()[0])
+        except:
+            if self.quietmode:
+                self.termlength = 1
+            else:
+                exit("can't pipe :(")
         self.threads = int(args.threads)
         self.timeFilter = parse_length_time_filter(args.timeFilter)
         self.timeout = int(args.timeout)
