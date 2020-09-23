@@ -26,6 +26,7 @@ def main():
     parser.add_argument('-p', "--payload", help='payload file',)
     parser.add_argument('-P', "--distant_payload",
                         help="use an online wordlist instead of a local one (do not use if your internet connection is shit, or the wordlist weight is like To)", default=False)
+    parser.add_argument("-R", "--regexPayload", help="use a regex to create your payload list")
     parser.add_argument("-d", "--data", default=None, help="Add POST data")
     parser.add_argument('-b', "--basePayload",
                         help="Payload for base request", default="Sicarius")
@@ -88,7 +89,7 @@ def main():
 
     print(f"\n{dark_blue}Loading wordlist, please wait...{end}",
           file=settings.stdout)
-    if not settings.payloadFile and settings.distant_payload:
+    if not settings.payloadFile and settings.distant_payload and not settings.regexPayload:
         req = None
         print(f"{yellow}Downloading wordlist @ {settings.distant_payload}{end}",
               file=settings.stdout)
@@ -104,7 +105,8 @@ def main():
         print(f"{dark_blue}Wordlist downloaded successfully{end}",
               file=settings.stdout)
         payloaddata = req.text
-    else:
+        payload = list(payloaddata.split('\n'))
+    elif settings.payloadFile and not settings.distant_payload and not settings.regexPayload:
         try:
             with open(settings.payloadFile, "r") as f:
                 payloaddata = f.read()
@@ -112,10 +114,24 @@ def main():
             print(f"{red}Error: cannot read file {settings.payloadFile} Error: {e}{end}",
                   file=settings.stdout)
             exit(42)
+        payload = list(payloaddata.split('\n'))
+    else:
+        try:
+            import exrex
+        except:
+            print(f"{red}Missing dependency \"exrex\"! if you want to use the regex payload generation, you have to use this command first: 'pip3 install exrex'")
+            exit(42)
+        try:
 
+            re.compile(settings.regexPayload)
+        except:
+            print(f"{red}Bad regex !! please check that your regex is correct !")
+            exit(42)
+        print(f"{dark_blue}Generating the payload list based on your regex{end}", file=settings.stdout)
+        payloaddata = exrex.generate(settings.regexPayload)
+        payload = list(payloaddata)
     # payload file processing
 
-    payload = list(payloaddata.split('\n'))
     if settings.shuffle:
         random.shuffle(payload)
     payload_len = len(payload)
