@@ -3,7 +3,9 @@ An intruder custom that gave me bounties
 
 If the code is disgusting, it's okay, I can live with it :)
 
-This program is pip-free ! no need to install any shitty pip package to work (excepted Requests ofc). You're welcome.
+This program is pip-free ! no need to install any shitty pip package to work* (excepted Requests ofc). You're welcome.
+
+* If you don't use the -R flag (this allows you to generate wordlists based on regexes. This feature relies on "exrex".)
 
 # Command examples
 
