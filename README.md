@@ -47,12 +47,12 @@ The limit is pretty much your imagination...
 usage: supertruder.py [-h] [-u URL] [-p PAYLOAD] [-P DISTANT_PAYLOAD]
                       [-d DATA] [-b BASEPAYLOAD] [-H HEADERS] [-S REPLACESTR]
                       [-f FILTER] [-l LENGTHFILTER] [-m] [-el EXCLUDELENGTH]
-                      [-t TIMEFILTER] [-o DUMPHTML] [--offset OFFSET] [-r]
-                      [--forceEncode] [--timeout TIMEOUT]
+                      [-t TIMEFILTER] [-o DUMPHTML] [--offset OFFSET]
+                      [--shuffle] [-r] [--forceEncode] [--timeout TIMEOUT]
                       [--throttle THROTTLE] [--verify] [--difftimer DIFFTIMER]
                       [--textDifference TEXTDIFFERENCE] [--quickRatio]
                       [--threads THREADS] [--ignoreBaseRequest]
-                      [--uselessprint]
+                      [--uselessprint] [-q]
 
 SuperTruder: Fuzz something, somewhere in an URL, data or HTTP headers
 
@@ -92,6 +92,7 @@ optional arguments:
                         file to dump html content
   --offset OFFSET       Start over where you stopped by giving the payload
                         offset
+  --shuffle             Shuffle the payload list
   -r, --redir           Allow HTTP redirects
   --forceEncode         Force URL encode
   --timeout TIMEOUT
@@ -106,8 +107,11 @@ optional arguments:
   --threads THREADS
   --ignoreBaseRequest   Force testing even if base request failed
   --uselessprint        Disable useless self-rewriting print (with '\r')
+  -q, --quiet           tell the program to output only the results
 
-Tired of using ffuf ? Tired of using burp's slow intruder ? Checkout SuperTruder, an intruder that isn't hard to use, or incredibly slow Made with love by Sicarius (@AMTraaaxX)
+Tired of using ffuf ? Tired of using burp's slow intruder ? Checkout
+SuperTruder, an intruder that isn't hard to use, or incredibly slow Made with
+love by Sicarius (@AMTraaaxX)
 ```
 
 # Note

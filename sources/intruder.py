@@ -73,7 +73,7 @@ def main():
                         action="store_true", help="Force testing even if base request failed")
     parser.add_argument("--uselessprint", help="Disable useless self-rewriting print (with '\\r')",
                         default=False, action="store_true")
-    parser.add_argument("-q", "--quiet", help="tell the program tu output only the results",
+    parser.add_argument("-q", "--quiet", help="tell the program to output only the results",
                         default=False, action="store_true")
 
     args = parser.parse_args()
