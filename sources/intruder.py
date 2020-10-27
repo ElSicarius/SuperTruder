@@ -29,7 +29,7 @@ def main():
     parser.add_argument("-R", "--regexPayload", help="use a regex to create your payload list")
     parser.add_argument("-d", "--data", default=None, help="Add POST data")
     parser.add_argument('-b', "--basePayload",
-                        help="Payload for base request", default="Sicarius")
+                        help="Payload for base request", default="Fuzzing")
     parser.add_argument("-H", "--headers", default={},
                         help="Add extra Headers (syntax: \"header: value\\nheader2: value2\")")
     parser.add_argument("-S", "--replaceStr", default="§")
