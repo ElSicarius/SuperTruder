@@ -19,125 +19,124 @@ def set_global(settings):
     globals()["settings"] = settings
 
 
-class Settings:
-    def __init__(self, args):
-        if not args.url or not (args.payload or args.distant_payload or args.regexPayload):
-            print(f"{red}Error, not enough args, see help (-h) for more details{end}")
-            exit(42)
+def request_handler(url, payload, data=None, method=None):
+    method = settings.method if not method else method
+    if method == "GET":
+        return get_(url, payload)
+    if method == "POST":
+        return post_(url, data, payload)
 
-        self.basePayload = args.basePayload
-        self.url = args.url
-        self.clean_url = "".join(re.findall(
-            "https?:\/\/[a-z\dA-Z.-]+", self.url))
-        self.difference = float(args.textDifference)
-        self.difftimer = int(args.difftimer)
-        self.excludeLength = parse_excluded_length(args.excludeLength)
-        self.forceEncode = args.forceEncode
-        self.throttle = float(args.throttle)
-        self.httpcodesFilter, self.status_table_printable = parse_filter(
-            args.filter)
-        self.lengthFilter = parse_length_time_filter(args.lengthFilter)
-        self.matchBase = args.matchBaseRequest
-        self.stdout = open(os.devnull, 'w') if args.quiet else sys.__stdout__
-        self.quietmode = True if args.quiet else False
-        self.out = args.dumpHtml
-        if self.out:
-            self.fileStream = open(self.out, "ab+")
-        self.payloadFile = args.payload
-        self.distant_payload = args.distant_payload
-        self.regexPayload = args.regexPayload
-        self.payload_offset = int(args.offset)
-        self.quick_ratio = args.quickRatio
-        self.redir = args.redir
-        self.replaceStr = args.replaceStr
+
+def get_arguments():
+    parser = argparse.ArgumentParser(description='SuperTruder: Fuzz something, somewhere in an URL, data or HTTP headers',
+                                     epilog="Tired of using ffuf ? Tired of using burp's slow intruder ? Checkout SuperTruder, an intruder that isn't hard to use, or incredibly slow\n Made with love by Sicarius (@AMTraaaxX) ")
+
+    # Fuzzing stuff
+    parser.add_argument('-u', "--url", help='Url to test',)
+    parser.add_argument('-p', "--payload", help='payload file',)
+    parser.add_argument('-P', "--distant_payload",
+                        help="use an online wordlist instead of a local one (do not use if your internet connection is shit, or the wordlist weight is like To)", default=False)
+    parser.add_argument("-R", "--regexPayload", help="use a regex to create your payload list")
+    parser.add_argument("-d", "--data", default=None, help="Add POST data")
+    parser.add_argument('-b', "--basePayload",
+                        help="Payload for base request", default="Fuzzing")
+    parser.add_argument("-H", "--headers", default={},
+                        help="Add extra Headers (syntax: \"header: value\\nheader2: value2\")")
+    parser.add_argument("-S", "--replaceStr", default="§")
+
+    # Sorting stuff
+    parser.add_argument(
+        "-f", "--filter", help="Filter positives match with httpcode, comma separated, to exclude one: n200", default='any')
+    parser.add_argument("-l", "--lengthFilter",
+                        help='Specify the len range that we\'ll use to accept responses (eg: 0,999 or any, if 3 values, we\'ll accept EXACTLY this values)', default="any,any")
+    parser.add_argument("-m", '--matchBaseRequest',
+                        action="store_true", default=False)
+    parser.add_argument("-el", "--excludeLength",
+                        help='Specify the len range that we\'ll use to deny responses (eg: 0,999 or any, if 3 values, we\'ll refuse EXACTLY this values)', default="none,none")
+    parser.add_argument(
+        "-t", "--timeFilter", help='Specify the time range that we\'ll use to accept responses (eg: 0,999 or any, if 3 values, we\'ll accept EXACTLY this values)', default="any,any")
+
+    # misc stuff
+    parser.add_argument('-o', '--dumpHtml', help='file to dump html content')
+    parser.add_argument(
+        "--offset", help="Start over where you stopped by giving the payload offset", default=0)
+    parser.add_argument("--shuffle", help="Shuffle the payload list", default=False, action="store_true")
+
+    # request stuff
+    parser.add_argument('-r', "--redir", dest="redir", default=False,
+                        action="store_true", help='Allow HTTP redirects')
+    parser.add_argument(
+        "--forceEncode", help="Force URL encode", action="store_true")
+    parser.add_argument("--timeout", default=20)
+    parser.add_argument(
+        "--throttle", help="throttle between the requests", default=0.01)
+    parser.add_argument("--verify", default=False, action="store_true")
+
+    # program functionnalities
+    parser.add_argument(
+        "--difftimer", help="Change the default matching timer (default 2000ms -> 2 seconds)", default=2000)
+    parser.add_argument(
+        "--textDifference", help="Percentage difference to match pages default: 99%%", default=0.99)
+    parser.add_argument("--quickRatio", help="Force quick ratio of pages (a bit faster)",
+                        action="store_true", default=False)
+    parser.add_argument("--threads", default=5)
+    parser.add_argument("--ignoreBaseRequest", default=False,
+                        action="store_true", help="Force testing even if base request failed")
+    parser.add_argument("--uselessprint", help="Disable useless self-rewriting print (with '\\r')",
+                        default=False, action="store_true")
+    parser.add_argument("-q", "--quiet", help="tell the program to output only the results",
+                        default=False, action="store_true")
+    parser.add_argument("-v",'--verbose', help="Change the verbosity of the program (available: 1,2,3)", default=2)
+
+    args = parser.parse_args()
+    return args
+
+
+def gen_payload():
+    print(f"\n{dark_blue}Loading wordlist, please wait...{end}",
+          file=settings.stdout if settings.verbosity > 2 else settings.devnull)
+    if not settings.payloadFile and settings.distant_payload and not settings.regexPayload:
+        req = None
+        print(f"{yellow}Downloading wordlist @ {settings.distant_payload}{end}",
+              file=settings.stdout)
         try:
-            self.termlength = int(os.get_terminal_size()[0])
+            req = get(settings.distant_payload, timeout=settings.timeout,
+                      allow_redirects=settings.redir, verify=settings.verify)
+        except Exception as e:
+            print(f"{red}Error: cannot reach file at {settings.distant_payload} Error: {e}{end}",
+                  file=settings.stdout)
+            print(f"{red}Request info: {yellow} Status {req.status_code}{end}",
+                  file=settings.stdout)
+            exit(42)
+        print(f"{dark_blue}Wordlist downloaded successfully{end}",
+              file=settings.stdout)
+        payloaddata = req.text
+        payload = list(payloaddata.split('\n'))
+    elif settings.payloadFile and not settings.distant_payload and not settings.regexPayload:
+        try:
+            with open(settings.payloadFile, "r") as f:
+                payloaddata = f.read()
+        except Exception as e:
+            print(f"{red}Error: cannot read file {settings.payloadFile} Error: {e}{end}",
+                  file=settings.stdout)
+            exit(42)
+        payload = list(payloaddata.split('\n'))
+    else:
+        try:
+            import exrex
         except:
-            if self.quietmode:
-                self.termlength = 1
-            else:
-                exit("can't pipe :(")
-        self.threads = int(args.threads)
-        self.timeFilter = parse_length_time_filter(args.timeFilter)
-        self.timeout = int(args.timeout)
-        self.uselessprint = not args.uselessprint
-        self.verify = args.verify
-        self.shuffle = True if args.shuffle else False
-        self.headers = args.headers if args.headers == {
-        } else self.loadHeaders(args.headers)
-
-        self.forceTest = args.ignoreBaseRequest
-        self.base_request = {"req": None, "text": "", "time": 0, "status": 0}
-        self.retry = True
-        self.method = "GET"
-        self.data = None
-        self.errors_count = 0
-        self.retry_count = 0
-
-        if args.data:
-            self.method = "POST"
-            self.data = args.data
-
-        if self.replaceStr not in self.url and self.replaceStr not in str(self.headers):
-            if self.method == "GET":
-                print(f"{red}Error: Missing {self.replaceStr} in URL provided{end}")
-                exit(42)
-            if self.method == "POST" and self.replaceStr not in self.data:
-                print(
-                    f"{red}Error: Missing {self.replaceStr} in URL/Data provided{end}")
-                exit(42)
-
-    def loadHeaders(self, headers_string):
-        headers = headers_string.split("\\n")
-        header_final = {}
-        for h in headers:
-            splitted = h.replace("\\!", "!").split(": ")
-            if len(splitted) != 2:
-                print(f"{red} You have an error on the header syntax, exitting{end}")
-                exit(42)
-            header_final.update({splitted[0]: splitted[1]})
-        return header_final
-
-    def __str__(self):
-        if "any,any" in self.lengthFilter:
-            length_message = f"Selecting length matching: {end}any"
-        elif len(self.lengthFilter) == 2:
-            length_message = f"Selecting responses len following: {end}{self.lengthFilter[0]} {yellow}<= len <={end} {self.lengthFilter[1]}"
-        else:
-            length_message = f"Selecting responses len is in: {end}{self.lengthFilter}"
-
-        if "any,any" in self.timeFilter:
-            time_message = f"Selecting response time matching: {end}any"
-        elif len(self.timeFilter) == 2:
-            time_message = f"Selecting responses time following: {end}{self.timeFilter[0]} {yellow}<= time <={end} {self.timeFilter[1]}"
-        else:
-            time_message = f"Selecting responses time is in: {end}{self.timeFilter}"
-
-        return f"""
-{green}Current global settings:
-        {light_blue}Url: {end}{self.url}
-        {light_blue}HTTP Method: {end}{self.method}
-        {light_blue}Additionnal data:
-            {light_blue}Headers: {end}{self.headers}
-            {light_blue}Data: {end}{self.data if self.data == None or len(self.data)<=20 else self.data[:10]+f"{yellow}[...]{end}"+self.data[-10:]}
-        {light_blue}Payloads file: {end}{self.payloadFile}
-        {light_blue}Payload URL: {end}{self.distant_payload}
-        {light_blue}Base payload: {end}{self.basePayload}
-        {light_blue}Redirections allowed: {end}{self.redir}
-        {light_blue}Timeout of requests: {end}{self.timeout}
-        {light_blue}Throttle between requests: {end}{self.throttle}
-        {light_blue}Threads: {end}{self.threads}
-        {light_blue}Force Encoding: {end}{"True" if self.forceEncode else "False"}
-        {light_blue}Dumping HTML pages: {end}{"True, outfile:"+self.out if self.out else "False"}
-
-{green}Current Trigger settings:
-        {light_blue}Selecting HTTP status code: {end}{self.status_table_printable}
-        {light_blue}{length_message}
-        {light_blue}{time_message}
-        {light_blue}Excluding length mathing: {end}{self.excludeLength}
-        {light_blue}Trigger time difference: {end}{self.difftimer}
-        {light_blue}Match page techniques: {end}{"Quick ratio" if self.quick_ratio else "Strict ratio"}
-        {light_blue}Match page difference: {end}difference <= {self.difference}{end}"""
+            print(f"{red}Missing dependency \"exrex\"! if you want to use the regex payload generation, you have to use this command first: 'pip3 install exrex'")
+            exit(42)
+        try:
+            re.compile(settings.regexPayload)
+        except:
+            print(f"{red}Bad regex !! please check that your regex is correct !")
+            exit(42)
+        print(f"{dark_blue}Generating the payload list based on your regex{end}", file=settings.stdout)
+        payloaddata = exrex.generate(settings.regexPayload)
+        payload = list(payloaddata)
+    del payloaddata
+    return payload
 
 
 def get_base_request():
@@ -364,11 +363,13 @@ def replace_string(data, focus, new_data):
 
 
 def get_(url, parameter):
-    sleep(settings.throttle)
-    temp_headers = settings.headers if not settings.replaceStr in str(settings.headers) else json.loads(
-        replace_string(json.dumps(settings.headers, ensure_ascii=False), settings.replaceStr, "parameter"))
+    if settings.throttle > 0:
+        sleep(settings.throttle)
+    temp_headers = settings.headers
+    if settings.headerprocess:
+        temp_headers = json.loads(replace_string(json.dumps(settings.headers, ensure_ascii=False), settings.replaceStr, parameter))
     try:
-        req = get(url, timeout=settings.timeout, allow_redirects=settings.redir,
+        req = settings.session.get(url, timeout=settings.timeout, allow_redirects=settings.redir,
                   verify=settings.verify, headers=temp_headers)
         if req.status_code == 429:
             print(
@@ -377,7 +378,7 @@ def get_(url, parameter):
         settings.errors_count += 1
         if settings.retry:
             try:
-                req = get(url, timeout=settings.timeout, allow_redirects=settings.redir,
+                req = settings.session.get(url, timeout=settings.timeout, allow_redirects=settings.redir,
                           verify=settings.verify, headers=temp_headers)
                 if req.status_code == 429:
                     print(
@@ -387,17 +388,17 @@ def get_(url, parameter):
                 req = None
         else:
             req = None
-
     return (req, parameter)
 
 
 def post_(url, data, parameter):
-    sleep(settings.throttle)
-    temp_headers = settings.headers if not settings.replaceStr in str(settings.headers) else json.loads(
-        replace_string(json.dumps(settings.headers, ensure_ascii=False), settings.replaceStr, "parameter"))
-
+    if settings.throttle > 0:
+        sleep(settings.throttle)
+    temp_headers = settings.headers
+    if settings.headerprocess:
+        temp_headers = json.loads(replace_string(json.dumps(settings.headers, ensure_ascii=False), settings.replaceStr, parameter))
     try:
-        req = post(url, data=data, timeout=settings.timeout, allow_redirects=settings.redir,
+        req = settings.session.post(url, data=data, timeout=settings.timeout, allow_redirects=settings.redir,
                    verify=settings.verify, headers=temp_headers)
         if req.status_code == 429:
             print(
@@ -406,7 +407,7 @@ def post_(url, data, parameter):
         settings.errors_count += 1
         if settings.retry:
             try:
-                req = post(url, data=data, timeout=settings.timeout, allow_redirects=settings.redir,
+                req = settings.session.post(url, data=data, timeout=settings.timeout, allow_redirects=settings.redir,
                            verify=settings.verify, headers=temp_headers)
                 if req.status_code == 429:
                     print(
