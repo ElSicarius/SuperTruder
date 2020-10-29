@@ -19,9 +19,10 @@ class Settings:
         if args.shuffle and args.offset:
             print(f"{yellow} WARNING: you're offseting shuffled payloads, thats dumb :/{end}", )
 
-        self.verbosity = int(args.verbose)
+        self.verbosity = int(args.verbosity)
         self.basePayload = args.basePayload
         self.url = args.url
+        self.tamper = None if not args.tamper else load_tamper(args.tamper)
         self.clean_url = "".join(re.findall(
             "https?:\/\/[a-z\dA-Z.-]+", self.url))
         self.difference = float(args.textDifference)

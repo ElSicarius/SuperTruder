@@ -36,6 +36,28 @@ def request_handler(url, payload, data=None, method=None):
         return post_(url, data, payload)
 
 
+def load_tamper(module):
+    module_path = f"tampers.{module}"
+
+    if module_path in sys.modules:
+        return sys.modules[module_path]
+    try:
+        load = __import__(module_path, fromlist=[module])
+    except:
+        print(f"{red} Failed to load the module {module}, please make sure you've put it in the tampers directory{end}")
+        exit(42)
+    try:
+
+        dummyCheck = load.process("dummy")
+        if settings.verbosity > 1:
+            print(f"{dark_blue} Dummy check for the tamper module: 'dummy' became -> '{dummyCheck}'")
+    except Exception as e:
+        print(f"{red}Cannot find the 'process' function in your tamper script...{end}")
+        exit(42)
+    else:
+        return load
+
+
 def get_arguments():
     """
     Parses the argparse object
@@ -56,6 +78,7 @@ def get_arguments():
     parser.add_argument("-H", "--headers", default={},
                         help="Add extra Headers (syntax: \"header: value\\nheader2: value2\")")
     parser.add_argument("-S", "--replaceStr", default="§")
+    parser.add_argument("-T", "--tamper",help="Use tamper scripts located in the tamper directory (you can make your own)", default=None)
 
     # Sorting stuff
     parser.add_argument(
@@ -155,6 +178,12 @@ def gen_payload():
         payload = list(payloaddata)
     del payloaddata
 
+    if settings.tamper:
+        temp = list()
+        for item in payload:
+            temp.append(settings.tamper.process(item))
+        payload = temp
+        del temp
     return payload
 
 
