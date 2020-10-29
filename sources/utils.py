@@ -99,7 +99,7 @@ def get_arguments():
                         default=False, action="store_true")
     parser.add_argument("-q", "--quiet", help="tell the program to output only the results",
                         default=False, action="store_true")
-    parser.add_argument("-v",'--verbose', help="Change the verbosity of the program (available: 1,2,3)", default=2)
+    parser.add_argument("-v",'--verbosity', help="Change the verbosity of the program (available: 1,2,3)", default=2)
 
     args = parser.parse_args()
     return args

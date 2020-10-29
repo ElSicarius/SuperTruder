@@ -1,11 +1,11 @@
 # SuperTruder
-An intruder custom that gave me bounties
+An intruder custom that gave me bounties :)
 
 If the code is disgusting, it's okay, I can live with it :)
 
-This program is pip-free ! no need to install any shitty pip package to work* (excepted Requests ofc). You're welcome.
+*This program is pip-free ! no need to install any shitty pip package to work** (excepted Requests ofc). You're welcome.
 
-* If you don't use the -R flag (this allows you to generate wordlists based on regexes. This feature relies on "exrex".)
+* If you don't use the -R flag (this allows you to generate wordlists based on regexes. This feature relies on "exrex" -> pip3 install exrex.)
 
 # Command examples
 
@@ -116,7 +116,7 @@ optional arguments:
   --ignoreBaseRequest   Force testing even if base request failed
   --uselessprint        Disable useless self-rewriting print (with '\r')
   -q, --quiet           tell the program to output only the results
-  -v VERBOSE, --verbose VERBOSE
+  -v VERBOSITY, --verbosity VERBOSITY
                         Change the verbosity of the program (available: 1,2,3)
 
 Tired of using ffuf ? Tired of using burp's slow intruder ? Checkout
@@ -131,11 +131,13 @@ if you REALLLY want to disable it, replace the color values in const.py with emp
 Not happy with \r printing ? use `--uselessprint` flag.
 
 # Todo
-?
-
-# Ideas
--> for fuzzing -> create a raw request ?
+-> change we way we propagate the settings object
+-> find a way to go much faster on http headers fuzzing (current %25 faster without http headers fuzzing)
+-> clean the arguments
+-> remove the -el argument and do like filter param eg: -l 2000,50x,n4000....
+-> implement tamper scripts to preprocess the payload before sending it
 
 # It's beautiful
+-> old asciinema here
 
 <a href="https://asciinema.org/a/NxUbbjcZI4uCE2Y8ch2Ecw3s8"><img src="./images/asciinema.gif"/></a>
