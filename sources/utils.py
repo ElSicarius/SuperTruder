@@ -178,7 +178,12 @@ def gen_payload():
         temp = list()
         for item in payload:
             try:
-                temp.append(settings.tamper.process(item))
+                tempo = settings.tamper.process(item)
+                if isinstance(tempo, bytes):
+                    print(f"{red}Your tamper script should only return string and not bytes ! can't continue...")
+                    print(f"{red}It translated {yellow}{item}{red} to -> {yellow}{tempo}{end}")
+                    exit(42)
+                temp.append(tempo)
             except Exception as e:
                 print(f"{red}An exception occured in your tamper script ! Below is the stack trace of your script.")
                 print(f"{red}Error: {e}{end}")
@@ -194,6 +199,9 @@ def check_tamper(tamper):
         dummyCheck = tamper.process(dummy_tamper_check)
         if settings.verbosity > 1:
             print(f"{dark_blue}Dummy check for the tamper module loaded: {yellow}{dummy_tamper_check}{dark_blue} became -> {yellow}'{dummyCheck}'{end}")
+        if isinstance(dummyCheck, bytes):
+            print(f"{red}Your tamper script should only return string and not bytes ! can't continue...")
+            exit(42)
     except Exception as e:
         print(f"{red}An exception occured in your tamper script !")
         print(f"{yellow}Hint: Can you find the 'process' function in your tamper script ?\n Stack trace: {e}{end}")
@@ -209,15 +217,13 @@ def get_base_request():
     req = None
     if settings.method == "GET":
         try:
-            req, payload = get_(replace_string(
-                settings.url, settings.replaceStr, settings.basePayload), settings.basePayload)
+            req, payload = get_(settings.url.replace(settings.replaceStr, settings.basePayload), settings.basePayload)
         except Exception as e:
             print(
                 f"{red}An error occured while requesting base request. Error: {e}{end}")
     elif settings.method == "POST":
         try:
-            req, payload = post_(replace_string(settings.url, settings.replaceStr, settings.basePayload), replace_string(
-                settings.data, settings.replaceStr, settings.basePayload), settings.basePayload)
+            req, payload = post_(settings.url.replace(settings.replaceStr, settings.basePayload), settings.data.replace(settings.replaceStr, settings.basePayload), settings.basePayload)
         except Exception as e:
             print(
                 f"{red}An error occured while requesting base request. Error: {e}{end}")
@@ -475,14 +481,6 @@ def color_status(status):
     return status
 
 
-def replace_string(data, focus, new_data):
-    """
-    Replace some data into an other data and check if we need to the force encode the replace string parameter*
-    :returns the original string with the parameter replaced
-    """
-    return data.replace(focus, quote(new_data) if settings.forceEncode else new_data)
-
-
 def get_(url, parameter):
     """
     Do a GET request in the session object
@@ -494,7 +492,7 @@ def get_(url, parameter):
         sleep(settings.throttle)
     temp_headers = settings.headers
     if settings.headerprocess:
-        temp_headers = json.loads(replace_string(json.dumps(settings.headers, ensure_ascii=False), settings.replaceStr, parameter))
+        temp_headers = json.loads(json.dumps(settings.headers, ensure_ascii=False).replace(settings.replaceStr, parameter))
     try:
         req = settings.session.get(url, timeout=settings.timeout, allow_redirects=settings.redir,
                   verify=settings.verify, headers=temp_headers)
@@ -529,7 +527,7 @@ def post_(url, data, parameter):
         sleep(settings.throttle)
     temp_headers = settings.headers
     if settings.headerprocess:
-        temp_headers = json.loads(replace_string(json.dumps(settings.headers, ensure_ascii=False), settings.replaceStr, parameter))
+        temp_headers = json.loads(json.dumps(settings.headers, ensure_ascii=False).replace(settings.replaceStr, parameter))
     try:
         req = settings.session.post(url, data=data, timeout=settings.timeout, allow_redirects=settings.redir,
                    verify=settings.verify, headers=temp_headers)

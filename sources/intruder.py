@@ -57,9 +57,9 @@ def main():
         executor = ThreadPoolExecutor(max_workers=settings.threads)
         futures.update({\
             executor.submit(request_handler\
-                            , replace_string(settings.url, settings.replaceStr, p)\
+                            , settings.url.replace(settings.replaceStr, p)\
                             , p\
-                            , data=replace_string(settings.data, settings.replaceStr, p)\
+                            , data=settings.data.replace(settings.replaceStr, p)\
                             ) for p in payload[settings.payload_offset:] })
         while futures:
             done, futures = wait(futures, return_when=FIRST_COMPLETED)
