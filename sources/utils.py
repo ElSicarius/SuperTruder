@@ -46,14 +46,6 @@ def load_tamper(module):
     except:
         print(f"{red} Failed to load the module {module}, please make sure you've put it in the tampers directory{end}")
         exit(42)
-    try:
-
-        dummyCheck = load.process("dummy")
-        if settings.verbosity > 1:
-            print(f"{dark_blue} Dummy check for the tamper module: 'dummy' became -> '{dummyCheck}'")
-    except Exception as e:
-        print(f"{red}Cannot find the 'process' function in your tamper script...{end}")
-        exit(42)
     else:
         return load
 
@@ -179,12 +171,33 @@ def gen_payload():
     del payloaddata
 
     if settings.tamper:
+        # checking the viability of the tamper script
+        check_tamper(settings.tamper)
+        if settings.verbosity > 1:
+            print(f"{dark_blue}Tampering all your payloads with the script provided...{end}")
         temp = list()
         for item in payload:
-            temp.append(settings.tamper.process(item))
+            try:
+                temp.append(settings.tamper.process(item))
+            except Exception as e:
+                print(f"{red}An exception occured in your tamper script ! Below is the stack trace of your script.")
+                print(f"{red}Error: {e}{end}")
+                exit(42)
+
         payload = temp
         del temp
     return payload
+
+
+def check_tamper(tamper):
+    try:
+        dummyCheck = tamper.process(dummy_tamper_check)
+        if settings.verbosity > 1:
+            print(f"{dark_blue}Dummy check for the tamper module loaded: {yellow}{dummy_tamper_check}{dark_blue} became -> {yellow}'{dummyCheck}'{end}")
+    except Exception as e:
+        print(f"{red}An exception occured in your tamper script !")
+        print(f"{yellow}Hint: Can you find the 'process' function in your tamper script ?\n Stack trace: {e}{end}")
+        exit(42)
 
 
 def get_base_request():

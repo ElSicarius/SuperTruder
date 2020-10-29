@@ -29,6 +29,7 @@ def main():
     print(settings, file=settings.stdout if settings.verbosity > 2 else settings.devnull)
     del args
 
+    
     base_request = get_base_request()
     payload = gen_payload()
 

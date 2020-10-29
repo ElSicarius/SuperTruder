@@ -10,3 +10,6 @@ red = "\033[91m"
 yellow = "\033[93m"
 end = "\033[0m"
 banner = "\033[1m\033[33m"
+
+# string to test all the tampers scripts
+dummy_tamper_check = b"\xc0Sup3rTrud3R123@!!"

@@ -82,6 +82,7 @@ class Settings:
                     f"{red}Error: Missing {self.replaceStr} in URL/Data provided{end}")
                 exit(42)
 
+                
     def loadHeaders(self, headers_string):
         headers = headers_string.split("\\n")
         header_final = {}
