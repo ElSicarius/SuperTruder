@@ -50,14 +50,15 @@ The limit is pretty much your imagination...
 # Usage
 ```
 usage: supertruder.py [-h] [-u URL] [-p PAYLOAD] [-P DISTANT_PAYLOAD]
-                      [-d DATA] [-b BASEPAYLOAD] [-H HEADERS] [-S REPLACESTR]
-                      [-f FILTER] [-l LENGTHFILTER] [-m] [-el EXCLUDELENGTH]
+                      [-R REGEXPAYLOAD] [-d DATA] [-b BASEPAYLOAD]
+                      [-H HEADERS] [-S REPLACESTR] [-f FILTER]
+                      [-l LENGTHFILTER] [-m] [-el EXCLUDELENGTH]
                       [-t TIMEFILTER] [-o DUMPHTML] [--offset OFFSET]
                       [--shuffle] [-r] [--forceEncode] [--timeout TIMEOUT]
                       [--throttle THROTTLE] [--verify] [--difftimer DIFFTIMER]
                       [--textDifference TEXTDIFFERENCE] [--quickRatio]
                       [--threads THREADS] [--ignoreBaseRequest]
-                      [--uselessprint] [-q]
+                      [--uselessprint] [-q] [-v VERBOSE]
 
 SuperTruder: Fuzz something, somewhere in an URL, data or HTTP headers
 
@@ -70,6 +71,8 @@ optional arguments:
                         use an online wordlist instead of a local one (do not
                         use if your internet connection is shit, or the
                         wordlist weight is like To)
+  -R REGEXPAYLOAD, --regexPayload REGEXPAYLOAD
+                        use a regex to create your payload list
   -d DATA, --data DATA  Add POST data
   -b BASEPAYLOAD, --basePayload BASEPAYLOAD
                         Payload for base request
@@ -113,6 +116,8 @@ optional arguments:
   --ignoreBaseRequest   Force testing even if base request failed
   --uselessprint        Disable useless self-rewriting print (with '\r')
   -q, --quiet           tell the program to output only the results
+  -v VERBOSE, --verbose VERBOSE
+                        Change the verbosity of the program (available: 1,2,3)
 
 Tired of using ffuf ? Tired of using burp's slow intruder ? Checkout
 SuperTruder, an intruder that isn't hard to use, or incredibly slow Made with

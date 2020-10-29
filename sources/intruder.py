@@ -6,7 +6,6 @@ import sys
 from requests import get, post, packages
 from urllib.parse import unquote, quote
 
-
 import difflib
 from datetime import datetime
 from .utils import *
