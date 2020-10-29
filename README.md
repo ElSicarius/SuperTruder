@@ -128,7 +128,7 @@ love by Sicarius (@AMTraaaxX)
 I'm using colored printing coz it's beautiful. you can't disable it (yet).
 if you REALLLY want to disable it, replace the color values in const.py with empty values.
 
-Not happy with \r printing ? use `--uselessprint` flag.
+Not happy with \r printing ? Change the verbosity with `-v 1` or use `--uselessprint` flag.
 
 # Todo
 -> change we way we propagate the settings object
