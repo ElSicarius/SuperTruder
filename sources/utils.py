@@ -7,6 +7,7 @@ from requests import get, post, packages
 from urllib.parse import unquote, quote
 import difflib
 import re
+import argparse
 from time import sleep
 from .const import *
 
@@ -16,10 +17,18 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 def set_global(settings):
+    """
+    Set some globals for this file
+    ## TODO: find a better solution to propagate the "settings" object accross multiple files
+    """
     globals()["settings"] = settings
 
 
 def request_handler(url, payload, data=None, method=None):
+    """
+    Do a GET or a POST depending on the method set in settings (can be overrite with the method argument)
+    :returns the requests.response object
+    """
     method = settings.method if not method else method
     if method == "GET":
         return get_(url, payload)
@@ -28,6 +37,10 @@ def request_handler(url, payload, data=None, method=None):
 
 
 def get_arguments():
+    """
+    Parses the argparse object
+    :returns the arguments object
+    """
     parser = argparse.ArgumentParser(description='SuperTruder: Fuzz something, somewhere in an URL, data or HTTP headers',
                                      epilog="Tired of using ffuf ? Tired of using burp's slow intruder ? Checkout SuperTruder, an intruder that isn't hard to use, or incredibly slow\n Made with love by Sicarius (@AMTraaaxX) ")
 
@@ -93,6 +106,11 @@ def get_arguments():
 
 
 def gen_payload():
+    """
+    Processes the args and generate the payload list with the infos given
+
+    : returns the payload list object
+    """
     print(f"\n{dark_blue}Loading wordlist, please wait...{end}",
           file=settings.stdout if settings.verbosity > 2 else settings.devnull)
     if not settings.payloadFile and settings.distant_payload and not settings.regexPayload:
@@ -136,10 +154,16 @@ def gen_payload():
         payloaddata = exrex.generate(settings.regexPayload)
         payload = list(payloaddata)
     del payloaddata
+
     return payload
 
 
 def get_base_request():
+    """
+    Generate a first request to the target with a dummy payload to determine the origin status, length and content
+
+    this will set the settings request object to the request made
+    """
     req = None
     if settings.method == "GET":
         try:
@@ -177,9 +201,13 @@ def get_base_request():
 
 
 def is_identical(req, parameter):
-    # Here we'll assume that two pages with text matching each other by > 98% are identical
-    # The purpose of this comparison is to assume that pages can contain variables like time
-    # , IP or the parameter itself.
+    """
+    Here we'll assume that two pages with text matching each other by > 98% are identical
+    The purpose of this comparison is to assume that pages can contain variables like time,
+    IP or the parameter itself, we don't want to match everything because there is a slightly difference between the origin request and the payloady request.
+
+    So to be sure we don't match random things, we'll do a comparison with the value of args "textDifference"
+    """
     # Low cost check
     if settings.base_request["req"] == None:
         return False
@@ -193,12 +221,10 @@ def is_identical(req, parameter):
     if diff_timer_requests >= settings.difftimer:
         return False
 
-    #print(f"Text Similiratity: {(difference_of_text*100)}%")
-    #print(f"Difference with len of page1 {len(req1.content)}, page2 {len(req2.content)}")
-
-    # Well use "Real_quick_ratio" instead of "quick_ratio"
-    # This is needed because a page with a small length could be hard to match at +98% with an other page
+    # Well not use "Real_quick_ratio" instead of "quick_ratio"
+    # This would be needed because a page with a small length could be hard to match at +98% with an other page
     # Eg: page1 = "abcd" page2 = "abce"; difference = 1 caracter but match is 75% !
+    # but MEH ! it's http pages we'll assume the content is > 4 caracters ;)
     if settings.quick_ratio:
         difference_of_text = difflib.SequenceMatcher(
             None, settings.base_request["text"], req.text).quick_ratio()
@@ -213,6 +239,10 @@ def is_identical(req, parameter):
 
 
 def calc_remove_len(req1, parameter):
+    """
+    calculate the number of occurences of a given parameter in a requests.response object
+    This is needed to remove them in order to process the differences in length
+    """
     if settings.base_request["text"] != None:
         words_reflexions = settings.base_request["text"].count(parameter)
     else:
@@ -230,6 +260,11 @@ def calc_remove_len(req1, parameter):
 
 
 def parse_filter(arg):
+    """
+    Parse the input argument "-f" or "--filter"
+    : returns the status_table that will be used to process the info
+    : returns the status table that will be used to render the info
+    """
     status_table = dict({"deny": [], "allow": []})
     status_table_printable = dict({"deny": [], "allow": []})
     if 'any' in arg.lower():
@@ -266,6 +301,10 @@ def parse_filter(arg):
 
 
 def parse_length_time_filter(args):
+    """
+    This parses the length and the time filters
+    :returns the list of the differents values given
+    """
     splitted = args.split(",")
     if len(splitted) > 2:
         length_table = set()
@@ -277,6 +316,10 @@ def parse_length_time_filter(args):
 
 
 def parse_excluded_length(arg):
+    """
+    Parses the -el filter
+    ## TODO: parle the -l filter like the -f filter and remove -el parameter
+    """
     length_table = set()
     if "none" in arg:
         return []
@@ -296,6 +339,9 @@ def parse_excluded_length(arg):
 
 
 def print_nothing(time_print, current_status, payload_len, r, parameter, end="\r"):
+    """
+    print the temp status message, this is called "print_nothing" coz it's kinda useless
+    """
     if settings.uselessprint:
         print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t   \t     \t     \t\t{' '*settings.termlength}"[
               :settings.termlength - 50], end="\r", file=settings.stdout)
@@ -304,6 +350,10 @@ def print_nothing(time_print, current_status, payload_len, r, parameter, end="\r
 
 
 def length_matching(response_len):
+    """
+    Check if the length of the response is in the filters given
+    returns True or False
+    """
     if response_len in settings.excludeLength:
         return False
     go_length = False
@@ -325,6 +375,10 @@ def length_matching(response_len):
 
 
 def time_matching(response_len_time):
+    """
+    Check if the time of the response is in the filters given
+    returns True or False
+    """
     go_length = False
     if len(settings.timeFilter) == 2:
         if "any" in settings.timeFilter[0] and "any" in settings.timeFilter[1]:
@@ -343,7 +397,28 @@ def time_matching(response_len_time):
     return go_length
 
 
+def status_matching(status):
+    """
+    Check if the status of the response is in the filters given
+    returns True or False
+    """
+    if status in settings.httpcodesFilter["deny"]:
+        return False
+
+    if "any" in settings.httpcodesFilter["allow"]:
+        return True
+
+    if status in settings.httpcodesFilter["allow"]:
+        return True
+
+    return False
+
+
 def color_status(status):
+    """
+    Add some colors depending on the status returned
+    :returns a string with some colors around it
+    """
     status = str(status)
     if status[0] == str(5):
         status = f"{red}{status}"
@@ -359,10 +434,20 @@ def color_status(status):
 
 
 def replace_string(data, focus, new_data):
+    """
+    Replace some data into an other data and check if we need to the force encode the replace string parameter*
+    :returns the original string with the parameter replaced
+    """
     return data.replace(focus, quote(new_data) if settings.forceEncode else new_data)
 
 
 def get_(url, parameter):
+    """
+    Do a GET request in the session object
+    check if we timeout or if we have a status 429 (rate limit reached)
+    resend the request if it is set in the settings
+    :returns a tuple with the request object and the parameter requested
+    """
     if settings.throttle > 0:
         sleep(settings.throttle)
     temp_headers = settings.headers
@@ -392,6 +477,12 @@ def get_(url, parameter):
 
 
 def post_(url, data, parameter):
+    """
+    Do a POST request in the session object
+    check if we timeout or if we have a status 429 (rate limit reached)
+    resend the request if it is set in the settings
+    :returns a tuple with the request object and the parameter requested
+    """
     if settings.throttle > 0:
         sleep(settings.throttle)
     temp_headers = settings.headers
@@ -419,19 +510,3 @@ def post_(url, data, parameter):
             req = None
 
     return (req, parameter)
-
-
-def status_matching(status):
-    # return True if:
-    #  any or not blacklisted
-    # else return false
-    if status in settings.httpcodesFilter["deny"]:
-        return False
-
-    if "any" in settings.httpcodesFilter["allow"]:
-        return True
-
-    if status in settings.httpcodesFilter["allow"]:
-        return True
-
-    return False

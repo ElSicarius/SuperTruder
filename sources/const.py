@@ -1,3 +1,5 @@
+
+# Use this file to propagate globals variables 
 # some colors, needs to be global
 dark_blue = "\033[94m"
 bold = "\033[1m"
