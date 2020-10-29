@@ -1,11 +1,11 @@
 # SuperTruder
-An intruder custom that gave me bounties
+An intruder custom that gave me bounties :)
 
-If the code is disgusting, it's okay, I can live with it :)
+If the code is disgusting, I'm currently trying to improve my coding style, and tbh, it's okay, I can live with it :)
 
-This program is pip-free ! no need to install any shitty pip package to work* (excepted Requests ofc). You're welcome.
+**This program is pip-free ! no need to install any shitty pip package to work*** (excepted Requests ofc). You're welcome.
 
-* If you don't use the -R flag (this allows you to generate wordlists based on regexes. This feature relies on "exrex".)
+* If you don't use the -R flag (this allows you to generate wordlists based on regexes. This feature relies on "exrex" -> pip3 install exrex.)
 
 # Command examples
 
@@ -50,14 +50,15 @@ The limit is pretty much your imagination...
 # Usage
 ```
 usage: supertruder.py [-h] [-u URL] [-p PAYLOAD] [-P DISTANT_PAYLOAD]
-                      [-d DATA] [-b BASEPAYLOAD] [-H HEADERS] [-S REPLACESTR]
-                      [-f FILTER] [-l LENGTHFILTER] [-m] [-el EXCLUDELENGTH]
+                      [-R REGEXPAYLOAD] [-d DATA] [-b BASEPAYLOAD]
+                      [-H HEADERS] [-S REPLACESTR] [-f FILTER]
+                      [-l LENGTHFILTER] [-m] [-el EXCLUDELENGTH]
                       [-t TIMEFILTER] [-o DUMPHTML] [--offset OFFSET]
                       [--shuffle] [-r] [--forceEncode] [--timeout TIMEOUT]
                       [--throttle THROTTLE] [--verify] [--difftimer DIFFTIMER]
                       [--textDifference TEXTDIFFERENCE] [--quickRatio]
                       [--threads THREADS] [--ignoreBaseRequest]
-                      [--uselessprint] [-q]
+                      [--uselessprint] [-q] [-v VERBOSE]
 
 SuperTruder: Fuzz something, somewhere in an URL, data or HTTP headers
 
@@ -70,6 +71,8 @@ optional arguments:
                         use an online wordlist instead of a local one (do not
                         use if your internet connection is shit, or the
                         wordlist weight is like To)
+  -R REGEXPAYLOAD, --regexPayload REGEXPAYLOAD
+                        use a regex to create your payload list
   -d DATA, --data DATA  Add POST data
   -b BASEPAYLOAD, --basePayload BASEPAYLOAD
                         Payload for base request
@@ -113,6 +116,8 @@ optional arguments:
   --ignoreBaseRequest   Force testing even if base request failed
   --uselessprint        Disable useless self-rewriting print (with '\r')
   -q, --quiet           tell the program to output only the results
+  -v VERBOSITY, --verbosity VERBOSITY
+                        Change the verbosity of the program (available: 1,2,3)
 
 Tired of using ffuf ? Tired of using burp's slow intruder ? Checkout
 SuperTruder, an intruder that isn't hard to use, or incredibly slow Made with
@@ -123,14 +128,16 @@ love by Sicarius (@AMTraaaxX)
 I'm using colored printing coz it's beautiful. you can't disable it (yet).
 if you REALLLY want to disable it, replace the color values in const.py with empty values.
 
-Not happy with \r printing ? use `--uselessprint` flag.
+Not happy with \r printing ? Change the verbosity with `-v 1` or use `--uselessprint` flag.
 
 # Todo
-?
-
-# Ideas
--> for fuzzing -> create a raw request ?
+- -> change we way we propagate the settings object
+- -> find a way to go much faster on http headers fuzzing (current %25 faster without http headers fuzzing)
+- -> clean the arguments
+- -> remove the -el argument and do like filter param eg: -l 2000,50x,n4000....
+- -> implement tamper scripts to preprocess the payload before sending it
 
 # It's beautiful
+-> old setup of the tool here
 
 <a href="https://asciinema.org/a/NxUbbjcZI4uCE2Y8ch2Ecw3s8"><img src="./images/asciinema.gif"/></a>
