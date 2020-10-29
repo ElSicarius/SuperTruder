@@ -1,7 +1,7 @@
 # SuperTruder
 An intruder custom that gave me bounties :)
 
-If the code is disgusting, it's okay, I can live with it :)
+If the code is disgusting, I'm currently trying to improve my coding style, and tbh, it's okay, I can live with it :)
 
 **This program is pip-free ! no need to install any shitty pip package to work*** (excepted Requests ofc). You're welcome.
 
@@ -131,13 +131,13 @@ if you REALLLY want to disable it, replace the color values in const.py with emp
 Not happy with \r printing ? Change the verbosity with `-v 1` or use `--uselessprint` flag.
 
 # Todo
--> change we way we propagate the settings object
--> find a way to go much faster on http headers fuzzing (current %25 faster without http headers fuzzing)
--> clean the arguments
--> remove the -el argument and do like filter param eg: -l 2000,50x,n4000....
--> implement tamper scripts to preprocess the payload before sending it
+- -> change we way we propagate the settings object
+- -> find a way to go much faster on http headers fuzzing (current %25 faster without http headers fuzzing)
+- -> clean the arguments
+- -> remove the -el argument and do like filter param eg: -l 2000,50x,n4000....
+- -> implement tamper scripts to preprocess the payload before sending it
 
 # It's beautiful
--> old asciinema here
+-> old setup of the tool here
 
 <a href="https://asciinema.org/a/NxUbbjcZI4uCE2Y8ch2Ecw3s8"><img src="./images/asciinema.gif"/></a>
