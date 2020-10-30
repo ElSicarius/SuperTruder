@@ -92,7 +92,7 @@ def main():
                                 status = color_status(status)
                                 length = str(response_len)
                                 timer = str(response_time)
-                                url = r.url if not settings.forceEncode else unquote(r.url)
+                                url = r.url
                                 print(f"{' '*(settings.termlength)}",
                                       end="\r", file=settings.stdout)
                                 print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{status}\t{length}\t{timer}\t\t{p}{end}" if not settings.verbosity < 2 else f"{p}{end}")
