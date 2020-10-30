@@ -36,6 +36,21 @@ def request_handler(url, payload, data=None, method=None):
         return post_(url, data, payload)
 
 
+def load_tamper(module):
+    module_path = f"tampers.{module}"
+
+    if module_path in sys.modules:
+        return sys.modules[module_path]
+    try:
+        load = __import__(module_path, fromlist=[module])
+    except Exception as e:
+        print(f"{red} Failed to load the module {module}, please make sure you've put it in the tampers directory{end}")
+        print(f"{red} Here is your stacktrace: {e}")
+        exit(42)
+    else:
+        return load
+
+
 def get_arguments():
     """
     Parses the argparse object
@@ -56,6 +71,7 @@ def get_arguments():
     parser.add_argument("-H", "--headers", default={},
                         help="Add extra Headers (syntax: \"header: value\\nheader2: value2\")")
     parser.add_argument("-S", "--replaceStr", default="§")
+    parser.add_argument("-T", "--tamper",help="Use tamper scripts located in the tamper directory (you can make your own)", default=None)
 
     # Sorting stuff
     parser.add_argument(
@@ -78,8 +94,6 @@ def get_arguments():
     # request stuff
     parser.add_argument('-r', "--redir", dest="redir", default=False,
                         action="store_true", help='Allow HTTP redirects')
-    parser.add_argument(
-        "--forceEncode", help="Force URL encode", action="store_true")
     parser.add_argument("--timeout", default=20)
     parser.add_argument(
         "--throttle", help="throttle between the requests", default=0.01)
@@ -155,7 +169,42 @@ def gen_payload():
         payload = list(payloaddata)
     del payloaddata
 
+    if settings.tamper:
+        # checking the viability of the tamper script
+        check_tamper(settings.tamper)
+        if settings.verbosity > 1:
+            print(f"{dark_blue}Tampering all your payloads with the script provided...{end}")
+        temp = list()
+        for item in payload:
+            try:
+                tempo = settings.tamper.process(item)
+                if isinstance(tempo, bytes):
+                    print(f"{red}Your tamper script should only return string and not bytes ! can't continue...")
+                    print(f"{red}It translated {yellow}{item}{red} to -> {yellow}{tempo}{end}")
+                    exit(42)
+                temp.append(tempo)
+            except Exception as e:
+                print(f"{red}An exception occured in your tamper script ! Below is the stack trace of your script.")
+                print(f"{red}Error: {e}{end}")
+                exit(42)
+
+        payload = temp
+        del temp
     return payload
+
+
+def check_tamper(tamper):
+    try:
+        dummyCheck = tamper.process(dummy_tamper_check)
+        if settings.verbosity > 1:
+            print(f"{dark_blue}Dummy check for the tamper module loaded: {yellow}{dummy_tamper_check}{dark_blue} became -> {yellow}'{dummyCheck}'{end}")
+        if isinstance(dummyCheck, bytes):
+            print(f"{red}Your tamper script should only return string and not bytes ! can't continue...")
+            exit(42)
+    except Exception as e:
+        print(f"{red}An exception occured in your tamper script !")
+        print(f"{yellow}Hint: Can you find the 'process' function in your tamper script ?\n Stack trace: {e}{end}")
+        exit(42)
 
 
 def get_base_request():
@@ -167,15 +216,13 @@ def get_base_request():
     req = None
     if settings.method == "GET":
         try:
-            req, payload = get_(replace_string(
-                settings.url, settings.replaceStr, settings.basePayload), settings.basePayload)
+            req, payload = get_(settings.url.replace(settings.replaceStr, settings.basePayload), settings.basePayload)
         except Exception as e:
             print(
                 f"{red}An error occured while requesting base request. Error: {e}{end}")
     elif settings.method == "POST":
         try:
-            req, payload = post_(replace_string(settings.url, settings.replaceStr, settings.basePayload), replace_string(
-                settings.data, settings.replaceStr, settings.basePayload), settings.basePayload)
+            req, payload = post_(settings.url.replace(settings.replaceStr, settings.basePayload), settings.data.replace(settings.replaceStr, settings.basePayload), settings.basePayload)
         except Exception as e:
             print(
                 f"{red}An error occured while requesting base request. Error: {e}{end}")
@@ -433,14 +480,6 @@ def color_status(status):
     return status
 
 
-def replace_string(data, focus, new_data):
-    """
-    Replace some data into an other data and check if we need to the force encode the replace string parameter*
-    :returns the original string with the parameter replaced
-    """
-    return data.replace(focus, quote(new_data) if settings.forceEncode else new_data)
-
-
 def get_(url, parameter):
     """
     Do a GET request in the session object
@@ -452,7 +491,7 @@ def get_(url, parameter):
         sleep(settings.throttle)
     temp_headers = settings.headers
     if settings.headerprocess:
-        temp_headers = json.loads(replace_string(json.dumps(settings.headers, ensure_ascii=False), settings.replaceStr, parameter))
+        temp_headers = json.loads(json.dumps(settings.headers, ensure_ascii=False).replace(settings.replaceStr, parameter))
     try:
         req = settings.session.get(url, timeout=settings.timeout, allow_redirects=settings.redir,
                   verify=settings.verify, headers=temp_headers)
@@ -487,7 +526,7 @@ def post_(url, data, parameter):
         sleep(settings.throttle)
     temp_headers = settings.headers
     if settings.headerprocess:
-        temp_headers = json.loads(replace_string(json.dumps(settings.headers, ensure_ascii=False), settings.replaceStr, parameter))
+        temp_headers = json.loads(json.dumps(settings.headers, ensure_ascii=False).replace(settings.replaceStr, parameter))
     try:
         req = settings.session.post(url, data=data, timeout=settings.timeout, allow_redirects=settings.redir,
                    verify=settings.verify, headers=temp_headers)

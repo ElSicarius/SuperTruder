@@ -29,6 +29,7 @@ def main():
     print(settings, file=settings.stdout if settings.verbosity > 2 else settings.devnull)
     del args
 
+    
     base_request = get_base_request()
     payload = gen_payload()
 
@@ -56,9 +57,9 @@ def main():
         executor = ThreadPoolExecutor(max_workers=settings.threads)
         futures.update({\
             executor.submit(request_handler\
-                            , replace_string(settings.url, settings.replaceStr, p)\
+                            , settings.url.replace(settings.replaceStr, p)\
                             , p\
-                            , data=replace_string(settings.data, settings.replaceStr, p)\
+                            , data=settings.data.replace(settings.replaceStr, p)\
                             ) for p in payload[settings.payload_offset:] })
         while futures:
             done, futures = wait(futures, return_when=FIRST_COMPLETED)
@@ -91,7 +92,7 @@ def main():
                                 status = color_status(status)
                                 length = str(response_len)
                                 timer = str(response_time)
-                                url = r.url if not settings.forceEncode else unquote(r.url)
+                                url = r.url
                                 print(f"{' '*(settings.termlength)}",
                                       end="\r", file=settings.stdout)
                                 print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{status}\t{length}\t{timer}\t\t{p}{end}" if not settings.verbosity < 2 else f"{p}{end}")

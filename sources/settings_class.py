@@ -22,12 +22,13 @@ class Settings:
         self.verbosity = int(args.verbosity)
         self.basePayload = args.basePayload
         self.url = args.url
+        self.tamper = None if not args.tamper else load_tamper(args.tamper)
+        self.tamperName = args.tamper
         self.clean_url = "".join(re.findall(
             "https?:\/\/[a-z\dA-Z.-]+", self.url))
         self.difference = float(args.textDifference)
         self.difftimer = int(args.difftimer)
         self.excludeLength = parse_excluded_length(args.excludeLength)
-        self.forceEncode = args.forceEncode
         self.throttle = float(args.throttle)
         self.httpcodesFilter, self.status_table_printable = parse_filter(
             args.filter)
@@ -81,6 +82,7 @@ class Settings:
                     f"{red}Error: Missing {self.replaceStr} in URL/Data provided{end}")
                 exit(42)
 
+                
     def loadHeaders(self, headers_string):
         headers = headers_string.split("\\n")
         header_final = {}
@@ -121,7 +123,7 @@ class Settings:
         {light_blue}Timeout of requests: {end}{self.timeout}
         {light_blue}Throttle between requests: {end}{self.throttle}
         {light_blue}Threads: {end}{self.threads}
-        {light_blue}Force Encoding: {end}{"True" if self.forceEncode else "False"}
+        {light_blue}Tamper script: {end}{self.tamperName}
         {light_blue}Dumping HTML pages: {end}{"True, outfile:"+self.out if self.out else "False"}
 
 {green}Current Trigger settings:
