@@ -4,7 +4,7 @@ An intruder custom that gave me bounties :)
 If the code is disgusting, I'm currently trying to improve my coding style, and tbh, it's okay, I can live with it :)
 
 **This program is pip-free ! no need to install any shitty pip package to work** (excepted Requests ofc). You're welcome.
-      -> *Only If you don't use the -R flag (this allows you to generate wordlists based on regexes. This feature relies on "exrex" -> `pip3 install exrex`.)*
+This is pipfree *Only If you don't use the -R flag (this allows you to generate wordlists based on regexes. This feature relies on "exrex" -> `pip3 install exrex`.)*
 
 # Command examples
 
@@ -12,12 +12,18 @@ If the code is disgusting, I'm currently trying to improve my coding style, and 
 `python3 supertruder.py -p database/3digits.txt --threads 15 -f 200 -u "https://example.com/id=§" `
 
 - fuzz anything in the url & output only the results:
-`python3 supertruder.py -p database/3digits.txt --threads 15 -f 200 -u "https://example.com/id=§" -q `
+`python3 supertruder.py -p database/3digits.txt --threads 15 -f 200 -u "https://example.com/id=§" -v 1 `
+
+- fuzz anything in the url but preprocess your payload list with a **tamper** script that will force urlencoding:
+`python3 supertruder.py -p database/3digits.txt --threads 15 -f 200 -u "https://example.com/id=§" --tamper urlEncode`
+
+- fuzz anything in the url but preprocess your payload list with a **tamper** script that will force base 64 encoding:
+`python3 supertruder.py -p database/3digits.txt --threads 15 -f 200 -u "https://example.com/id=§" --tamper base64`
 
 - fuzz anything in the url but use a pattern (regex) to generate your payload list:
-`python3 supertruder.py -R "[\d]{3}" -u "https://test.site/index.php?id=§" --threads 15 -f 200`
+`python3 supertruder.py -R "\d{3}" -u "https://test.site/index.php?id=§" --threads 15 -f 200`
 
-- Fuzz anything in the url with a distant payload file:
+- Fuzz anything in the url with a distant payload file and remove all 50x responses:
 `python3 supertruder.py -u "https://google.fr/§" -P https://raw.githubusercontent.com/danielmiessler/SecLists/master/Fuzzing/1-4_all_letters_a-z.txt --threads 20 -f n50x`
 
 - Fuzz anything in the POST data, and don't select 404 & 302 responses:
@@ -30,19 +36,19 @@ If the code is disgusting, I'm currently trying to improve my coding style, and 
 `python3 supertruder.py -p database/3digits.txt --threads 15 -f 50x -u "https://example.com/§" `
 
 - Fuzz a list of urls and save contents (useful in bughunting):
-`python3 supertruder.py --threads 100 -p tests/urls.urls -u "§" --ignoreBaseRequest --timeout 30 -o htmldump.html`
+`python3 supertruder.py --threads 100 -p tests/mybugbountyprogram.urls -u "§" --ignoreBaseRequest --timeout 30 -o htmldump.html`
 
-- Fuzz something and match EXACTLY a response type, text and everything you know:
+- Fuzz something and match EXACTLY the origin request:
 `python3 supertruder.py --threads 20 -p database/payloads.txt -u "http://example.com/specialparameter=§" -b "mySpecialValue" --matchBaseRequest`
 
-- Fuzz something and match responses with content-length in range or matching values:
+- Fuzz something and match responses with excluded content-length or matching values:
 `python3 supertruder.py --threads 20 -p database/payloads.txt -u "http://example.com/lengthchanging=§" -l 2000,2300 -el 2250,2251`
 
 - Fuzz something in the headers of the request:
 `python3 supertruder.py --threads 30 -p database/3d.txt -u "https://google.fr/" -f n403,n404,n400 -H "IS-THIS-A-REAL-HEADER: §" -o reports/google_header_3digitspayload.html`
 
 - Fuzz a list of urls but shuffle them before:
-`python3 supertruder.py -t 10 --ignoreBaseRequest -u "§" -p /mnt/c/Users//BugBounty/program1/urls_multiple_hosts -f n30x -q --shuffle`
+`python3 supertruder.py -t 10 --ignoreBaseRequest -u "§" -p /mnt/c/Users/sicarius/BugBounty/program1/urls_multiple_hosts -f n30x -q --shuffle`
 
 The limit is pretty much your imagination...
 
