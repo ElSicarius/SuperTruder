@@ -54,10 +54,10 @@ The limit is pretty much your imagination...
 
 # Usage
 ```
-usage: supertruder.py [-h] [-u URL] [-p PAYLOAD] [-P DISTANT_PAYLOAD] [-R REGEXPAYLOAD] [-d DATA]
-                      [-b BASEPAYLOAD] [-H HEADERS] [-S REPLACESTR] [-T TAMPER] [-f FILTER]
-                      [-l LENGTHFILTER] [-m] [-el EXCLUDELENGTH] [-t TIMEFILTER] [-o DUMPHTML]
-                      [--offset OFFSET] [--shuffle] [-r] [--forceEncode] [--timeout TIMEOUT]
+usage: supertruder.py [-h] [-u URL] [-p PAYLOAD] [-P DISTANT_PAYLOAD] [-R REGEXPAYLOAD]
+                      [-d DATA] [-b BASEPAYLOAD] [-H HEADERS] [-S REPLACESTR] [-T TAMPER]
+                      [-f FILTER] [-l LENGTHFILTER] [-m] [-el EXCLUDELENGTH] [-t TIMEFILTER]
+                      [-o DUMPHTML] [--offset OFFSET] [--shuffle] [-r] [--timeout TIMEOUT]
                       [--throttle THROTTLE] [--verify] [--difftimer DIFFTIMER]
                       [--textDifference TEXTDIFFERENCE] [--quickRatio] [--threads THREADS]
                       [--ignoreBaseRequest] [--uselessprint] [-q] [-v VERBOSITY]
@@ -70,8 +70,8 @@ optional arguments:
   -p PAYLOAD, --payload PAYLOAD
                         payload file
   -P DISTANT_PAYLOAD, --distant_payload DISTANT_PAYLOAD
-                        use an online wordlist instead of a local one (do not use if your internet
-                        connection is shit, or the wordlist weight is like To)
+                        use an online wordlist instead of a local one (do not use if your
+                        internet connection is shit, or the wordlist weight is like To)
   -R REGEXPAYLOAD, --regexPayload REGEXPAYLOAD
                         use a regex to create your payload list
   -d DATA, --data DATA  Add POST data
@@ -81,25 +81,26 @@ optional arguments:
                         Add extra Headers (syntax: "header: value\nheader2: value2")
   -S REPLACESTR, --replaceStr REPLACESTR
   -T TAMPER, --tamper TAMPER
-                        Use tamper scripts located in the tamper directory (you can make your own)
+                        Use tamper scripts located in the tamper directory (you can make your
+                        own)
   -f FILTER, --filter FILTER
-                        Filter positives match with httpcode, comma separated, to exclude one: n200
+                        Filter positives match with httpcode, comma separated, to exclude one:
+                        n200
   -l LENGTHFILTER, --lengthFilter LENGTHFILTER
-                        Specify the len range that we'll use to accept responses (eg: 0,999 or any,
-                        if 3 values, we'll accept EXACTLY this values)
+                        Specify the len range that we'll use to accept responses (eg: 0,999 or
+                        any, if 3 values, we'll accept EXACTLY this values)
   -m, --matchBaseRequest
   -el EXCLUDELENGTH, --excludeLength EXCLUDELENGTH
-                        Specify the len range that we'll use to deny responses (eg: 0,999 or any, if
-                        3 values, we'll refuse EXACTLY this values)
+                        Specify the len range that we'll use to deny responses (eg: 0,999 or
+                        any, if 3 values, we'll refuse EXACTLY this values)
   -t TIMEFILTER, --timeFilter TIMEFILTER
-                        Specify the time range that we'll use to accept responses (eg: 0,999 or any,
-                        if 3 values, we'll accept EXACTLY this values)
+                        Specify the time range that we'll use to accept responses (eg: 0,999 or
+                        any, if 3 values, we'll accept EXACTLY this values)
   -o DUMPHTML, --dumpHtml DUMPHTML
                         file to dump html content
   --offset OFFSET       Start over where you stopped by giving the payload offset
   --shuffle             Shuffle the payload list
   -r, --redir           Allow HTTP redirects
-  --forceEncode         Force URL encode
   --timeout TIMEOUT
   --throttle THROTTLE   throttle between the requests
   --verify
@@ -115,8 +116,8 @@ optional arguments:
   -v VERBOSITY, --verbosity VERBOSITY
                         Change the verbosity of the program (available: 1,2,3)
 
-Tired of using ffuf ? Tired of using burp's slow intruder ? Checkout SuperTruder, an intruder that
-isn't hard to use, or incredibly slow Made with love by Sicarius (@AMTraaaxX)
+Tired of using ffuf ? Tired of using burp's slow intruder ? Checkout SuperTruder, an intruder
+that isn't hard to use, or incredibly slow Made with love by Sicarius (@AMTraaaxX)
 ```
 
 # Note
