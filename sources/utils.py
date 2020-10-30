@@ -43,8 +43,9 @@ def load_tamper(module):
         return sys.modules[module_path]
     try:
         load = __import__(module_path, fromlist=[module])
-    except:
+    except Exception as e:
         print(f"{red} Failed to load the module {module}, please make sure you've put it in the tampers directory{end}")
+        print(f"{red} Here is your stacktrace: {e}")
         exit(42)
     else:
         return load
@@ -93,8 +94,6 @@ def get_arguments():
     # request stuff
     parser.add_argument('-r', "--redir", dest="redir", default=False,
                         action="store_true", help='Allow HTTP redirects')
-    parser.add_argument(
-        "--forceEncode", help="Force URL encode", action="store_true")
     parser.add_argument("--timeout", default=20)
     parser.add_argument(
         "--throttle", help="throttle between the requests", default=0.01)

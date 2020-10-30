@@ -51,6 +51,15 @@ This is pipfree *Only If you don't use the -R flag (this allows you to generate 
 `python3 supertruder.py -t 10 --ignoreBaseRequest -u "§" -p /mnt/c/Users/sicarius/BugBounty/program1/urls_multiple_hosts -f n30x -q --shuffle`
 
 The limit is pretty much your imagination...
+# Tamper Scripts
+Here is the current list of the tamper scripts I've created
+
+- base64 -> encode each payload to base64
+- urlEncode -> urlencode each payload
+- doucleUrlEncode -> urlencode two times the payload
+- jwtEncode -> craft a JWT based on the data given in the tamper script (you must modify the key and the data)
+
+send me a twitter dm @AMTraaaxX if you have a suggestion or if you want to contribute to this project with your tamper scripts :)
 
 # Usage
 ```
