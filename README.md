@@ -130,7 +130,7 @@ Not happy with \r printing ? Change the verbosity with `-v 1` or use `--uselessp
 - -> find a way to go much faster on http headers fuzzing (current %25 faster without http headers fuzzing)
 - -> clean the arguments
 - -> remove the -el argument and do like filter param eg: -l 2000,50x,n4000....
-- ~~ -> implement tamper scripts to preprocess the payload before sending it ~~ 
+- ~~-> implement tamper scripts to preprocess the payload before sending it~~ 
 
 # It's beautiful
 -> old setup of the tool here
