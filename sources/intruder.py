@@ -29,14 +29,19 @@ def main():
     print(settings, file=settings.stdout if settings.verbosity > 2 else settings.devnull)
     del args
 
-    
+
     base_request = get_base_request()
     payload = gen_payload()
 
     # payload processing
     if settings.shuffle:
         random.shuffle(payload)
-    payload_len = len(payload)
+    payload_len = str(len(payload))
+    # quick fix for the printing problem
+    # if the len of the payload is < 5 the \t doesn't work like it should :/
+    # TODO: work on this printing thing
+    if len(payload_len) <4 :
+        payload_len = " "*(len(payload_len) % 4) + payload_len
     if settings.payload_offset > 0:
         print(
             f"{yellow}Starting from the payload n°{settings.payload_offset}/{payload_len}: '{payload[settings.payload_offset]}'{end}", file=settings.stdout)
@@ -95,7 +100,7 @@ def main():
                                 url = r.url
                                 print(f"{' '*(settings.termlength)}",
                                       end="\r", file=settings.stdout)
-                                print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{status}\t{length}\t{timer}\t\t{p}{end}" if not settings.verbosity < 2 else f"{p}{end}")
+                                print(f"{time_print}\t{format(current_status, f' {len(str(payload_len))}')}/{payload_len}\t{status}\t{length}\t{timer}\t\t{p}{end}" if not settings.verbosity < 2 else f"{p}{end}")
 
                                 if settings.out and len(r.content) != 0:
                                     try:

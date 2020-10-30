@@ -386,13 +386,13 @@ def parse_excluded_length(arg):
 
 
 def print_nothing(time_print, current_status, payload_len, r, parameter, end="\r"):
-    """
+    """ 
     print the temp status message, this is called "print_nothing" coz it's kinda useless
     """
     if settings.uselessprint:
-        print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t   \t     \t     \t\t{' '*settings.termlength}"[
+        print(f"{time_print}\t{format(current_status, f' {len(str(payload_len))}')}/{payload_len}\t   \t     \t     \t\t{' '*settings.termlength}"[
               :settings.termlength - 50], end="\r", file=settings.stdout)
-        print(f"{time_print}\t{format(current_status, f'0{len(str(payload_len))}')}/{payload_len}\t{r.status_code}\t{len(r.content)}\t{int(r.elapsed.total_seconds()*1000)}\t\t{parameter}"[
+        print(f"{time_print}\t{format(current_status, f' {len(str(payload_len))}')}/{payload_len}\t{r.status_code}\t{len(r.content)}\t{int(r.elapsed.total_seconds()*1000)}\t\t{parameter}"[
               :settings.termlength - 50], end="\r", file=settings.stdout)
 
 
