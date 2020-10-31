@@ -12,7 +12,7 @@ from .utils import *
 from .settings_class import *
 import random
 
-__version__ = "1.0"
+__version__ = "1.2"
 __author__ = "Sicarius (@AMTraaaxX)"
 
 # disable annoying warnings
